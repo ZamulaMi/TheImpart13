@@ -25,12 +25,26 @@ async function runPostBuild() {
     'utf-8'
   );
 
-  // 2. Гарантуємо наявність статичного dist/robots.txt
+  // 2. Гарантуємо наявність статичного dist/robots.txt, dist/favicon.ico та dist/favicon.svg
   const publicRobotsPath = path.resolve(process.cwd(), 'public', 'robots.txt');
   const distRobotsPath = path.join(distDir, 'robots.txt');
   if (fs.existsSync(publicRobotsPath)) {
     fs.copyFileSync(publicRobotsPath, distRobotsPath);
     console.log('[postbuild-seo] Copied public/robots.txt -> dist/robots.txt');
+  }
+
+  const publicIcoPath = path.resolve(process.cwd(), 'public', 'favicon.ico');
+  const distIcoPath = path.join(distDir, 'favicon.ico');
+  if (fs.existsSync(publicIcoPath)) {
+    fs.copyFileSync(publicIcoPath, distIcoPath);
+    console.log('[postbuild-seo] Copied public/favicon.ico -> dist/favicon.ico');
+  }
+
+  const publicSvgPath = path.resolve(process.cwd(), 'public', 'favicon.svg');
+  const distSvgPath = path.join(distDir, 'favicon.svg');
+  if (fs.existsSync(publicSvgPath)) {
+    fs.copyFileSync(publicSvgPath, distSvgPath);
+    console.log('[postbuild-seo] Copied public/favicon.svg -> dist/favicon.svg');
   }
 
   // 3. Генерація актуальних sitemap.xml та news-sitemap.xml

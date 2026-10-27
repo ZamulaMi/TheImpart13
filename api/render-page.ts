@@ -1307,6 +1307,35 @@ export default async function handler(req: any, res: any) {
     return newsSitemapHandler(req, res);
   }
 
+  // Обслуговування favicon.svg та favicon.ico (якщо запит надійшов через Vercel rewrite)
+  if (
+    /^\/favicon\.svg\b/i.test(rawReqUrl) ||
+    req?.query?.pathname === '/favicon.svg' ||
+    req?.query?.pathname === 'favicon.svg'
+  ) {
+    const filePath = path.resolve(process.cwd(), 'public', 'favicon.svg');
+    if (fs.existsSync(filePath)) {
+      res.setHeader('Content-Type', 'image/svg+xml');
+      res.setHeader('Cache-Control', 'public, max-age=86400');
+      if (req.method === 'HEAD') return res.status(200).end();
+      return res.status(200).send(fs.readFileSync(filePath, 'utf-8'));
+    }
+  }
+
+  if (
+    /^\/favicon\.ico\b/i.test(rawReqUrl) ||
+    req?.query?.pathname === '/favicon.ico' ||
+    req?.query?.pathname === 'favicon.ico'
+  ) {
+    const filePath = path.resolve(process.cwd(), 'public', 'favicon.ico');
+    if (fs.existsSync(filePath)) {
+      res.setHeader('Content-Type', 'image/x-icon');
+      res.setHeader('Cache-Control', 'public, max-age=86400');
+      if (req.method === 'HEAD') return res.status(200).end();
+      return res.status(200).send(fs.readFileSync(filePath));
+    }
+  }
+
   initResponseHelpers(res);
 
   res.setHeader('Access-Control-Allow-Origin', '*');

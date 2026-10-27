@@ -7,6 +7,8 @@ Allow: /sitemap.xml
 Allow: /sitemap-*.xml
 Allow: /news-sitemap.xml
 Allow: /news-sitemap-*.xml
+Allow: /favicon.svg
+Allow: /favicon.ico
 Allow: /api/sitemap
 Allow: /api/news-sitemap
 Allow: /api/article-image
@@ -26,7 +28,9 @@ Disallow: /api/upload
 Disallow: /api/settings
 Disallow: /api/stats
 
-# Карти сайту (Sitemap)
+# Карти сайту (Sitemap) для обох доменів
 Sitemap: https://www.theimpart.com/sitemap.xml
 Sitemap: https://www.theimpart.com/news-sitemap.xml
+Sitemap: https://theimpart.com/sitemap.xml
+Sitemap: https://theimpart.com/news-sitemap.xml
 `;

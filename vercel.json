@@ -69,6 +69,32 @@
       ]
     },
     {
+      "source": "/favicon.ico",
+      "headers": [
+        {
+          "key": "Content-Type",
+          "value": "image/x-icon"
+        },
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=86400"
+        }
+      ]
+    },
+    {
+      "source": "/favicon.svg",
+      "headers": [
+        {
+          "key": "Content-Type",
+          "value": "image/svg+xml"
+        },
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=86400"
+        }
+      ]
+    },
+    {
       "source": "/assets/(.*)",
       "headers": [
         {
@@ -76,19 +102,6 @@
           "value": "public, max-age=31536000, immutable"
         }
       ]
-    }
-  ],
-  "redirects": [
-    {
-      "source": "/:path*",
-      "has": [
-        {
-          "type": "host",
-          "value": "theimpart.com"
-        }
-      ],
-      "destination": "https://www.theimpart.com/:path*",
-      "permanent": true
     }
   ],
   "rewrites": [
@@ -157,8 +170,8 @@
       "destination": "/api/settings"
     },
     {
-      "source": "/article/:id",
-      "destination": "/api/render-page?pathname=/article/:id"
+      "source": "/article/:id*",
+      "destination": "/api/render-page?pathname=/article/:id*"
     },
     {
       "source": "/",
