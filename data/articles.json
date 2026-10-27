@@ -1,5 +1,150 @@
 [
   {
+    "id": "1793061630995",
+    "title": "Заголовок статті 8",
+    "excerpt": "Короткий опис (Короткий опис (Короткий опис (Короткий опис (Короткий опис (",
+    "showExcerptInArticle": true,
+    "content": "<div class=\"callout-box callout-dark\" data-variant=\"dark\" style=\"margin: 20px 0; padding: 16px; border-radius: 8px; border-left: 4px solid #000000; background: #171717;\">\n        <div class=\"callout-title\" style=\"font-weight: 600; font-size: 13px; text-transform: uppercase; margin-bottom: 6px; color: #fafafa; letter-spacing: 0.05em;\">\n          Коментар\n        </div>\n        <div class=\"callout-body\" style=\"color: #fafafa; line-height: 1.6;\">\n          Введіть текст повідомлення тут...\n        </div>\n      </div><p><br></p>",
+    "category": "Новини",
+    "categories": [
+      "Новини"
+    ],
+    "topics": [
+      "Усвідомленість"
+    ],
+    "author": "Редакція The Impart",
+    "date": "27 жовтня 2026 р.",
+    "createdAt": "2026-10-27T00:40:54.000Z",
+    "published": true,
+    "showExcerptInArticleEn": true,
+    "categoryEn": "Essay, News",
+    "categoriesEn": [
+      "Essay",
+      "News"
+    ],
+    "topicsEn": [
+      "Mindfulness"
+    ],
+    "publishedEn": false,
+    "views": 0
+  },
+  {
+    "id": "1793061602317",
+    "title": "Заголовок статті 7",
+    "excerpt": "Короткий опис Короткий опис Короткий опис Короткий опис Короткий опис Короткий опис",
+    "showExcerptInArticle": true,
+    "content": "<div class=\"callout-box callout-success\" data-variant=\"success\" style=\"margin: 20px 0; padding: 16px; border-radius: 8px; border-left: 4px solid #10b981; background: #f0fdf4;\">\n        <div class=\"callout-title\" style=\"font-weight: 600; font-size: 13px; text-transform: uppercase; margin-bottom: 6px; color: #047857; letter-spacing: 0.05em;\">\n          Висновок\n        </div>\n        <div class=\"callout-body\" style=\"color: #1f2937; line-height: 1.6;\">\n          Введіть текст повідомлення тут...\n        </div>\n      </div><p><br></p>",
+    "category": "Статті",
+    "categories": [
+      "Статті"
+    ],
+    "topics": [
+      "Час"
+    ],
+    "author": "Редакція The Impart",
+    "date": "27 жовтня 2026 р.",
+    "createdAt": "2026-10-27T00:40:27.000Z",
+    "published": true,
+    "showExcerptInArticleEn": true,
+    "categoryEn": "Essay, Articles",
+    "categoriesEn": [
+      "Essay",
+      "Articles"
+    ],
+    "topicsEn": [
+      "Time"
+    ],
+    "publishedEn": false,
+    "views": 0
+  },
+  {
+    "id": "1793061490376",
+    "title": "Заголовок статті 6",
+    "excerpt": "Короткий опис Короткий опис Короткий опис Короткий опис Короткий опис",
+    "showExcerptInArticle": true,
+    "content": "<div class=\"callout-box callout-warning\" data-variant=\"warning\" style=\"margin: 20px 0; padding: 16px; border-radius: 8px; border-left: 4px solid #f59e0b; background: #fefce8;\" bis_skin_checked=\"1\">\n        <div class=\"callout-title\" style=\"font-weight: 600; font-size: 13px; text-transform: uppercase; margin-bottom: 6px; color: #b45309; letter-spacing: 0.05em;\" bis_skin_checked=\"1\">\n          Зверніть увагу\n        </div>\n        <div class=\"callout-body\" style=\"color: #1f2937; line-height: 1.6;\" bis_skin_checked=\"1\">\n          Введіть текст повідомлення тут...\n        </div>\n      </div><p><br></p><div class=\"callout-box callout-info\" data-variant=\"info\" style=\"margin: 20px 0; padding: 16px; border-radius: 8px; border-left: 4px solid #38bdf8; background: #f0f9ff;\">\n        <div class=\"callout-title\" style=\"font-weight: 600; font-size: 13px; text-transform: uppercase; margin-bottom: 6px; color: #0369a1; letter-spacing: 0.05em;\">\n          До відома\n        </div>\n        <div class=\"callout-body\" style=\"color: #1f2937; line-height: 1.6;\">\n          Введіть текст повідомлення тут...\n        </div>\n      </div><p><br></p>",
+    "category": "Новини",
+    "categories": [
+      "Новини"
+    ],
+    "topics": [
+      "Час"
+    ],
+    "author": "Редакція The Impart",
+    "date": "27 жовтня 2026 р.",
+    "createdAt": "2026-10-27T00:38:44.000Z",
+    "published": true,
+    "showExcerptInArticleEn": true,
+    "categoryEn": "Essay, News",
+    "categoriesEn": [
+      "Essay",
+      "News"
+    ],
+    "topicsEn": [
+      "Time"
+    ],
+    "publishedEn": false,
+    "views": 0
+  },
+  {
+    "id": "1793060688591",
+    "title": "Заголовок статті 5",
+    "excerpt": "Короткий описКороткий описКороткий описКороткий описКороткий описКороткий описКороткий опис",
+    "showExcerptInArticle": true,
+    "content": "<div class=\"callout-box callout-danger\" data-variant=\"danger\" style=\"margin: 20px 0; padding: 16px; border-radius: 8px; border-left: 4px solid #ef4444; background: #fef2f2;\" bis_skin_checked=\"1\">\n        <div class=\"callout-title\" style=\"font-weight: 600; font-size: 13px; text-transform: uppercase; margin-bottom: 6px; color: #b91c1c; letter-spacing: 0.05em;\" bis_skin_checked=\"1\">\n          Важливо\n        </div>\n        <div class=\"callout-body\" style=\"color: #1f2937; line-height: 1.6;\" bis_skin_checked=\"1\">\n          Введіть текст повідомлення тут...\n        </div>\n      </div><div class=\"callout-box callout-success\" data-variant=\"success\" style=\"margin: 20px 0; padding: 16px; border-radius: 8px; border-left: 4px solid #10b981; background: #f0fdf4;\">\n        <div class=\"callout-title\" style=\"font-weight: 600; font-size: 13px; text-transform: uppercase; margin-bottom: 6px; color: #047857; letter-spacing: 0.05em;\">\n          Висновок\n        </div>\n        <div class=\"callout-body\" style=\"color: #1f2937; line-height: 1.6;\">\n          Введіть текст повідомлення тут...\n        </div>\n      </div><p><br></p>",
+    "category": "Новини",
+    "categories": [
+      "Новини"
+    ],
+    "topics": [
+      "Усвідомленість"
+    ],
+    "author": "Редакція The Impart",
+    "date": "27 жовтня 2026 р.",
+    "createdAt": "2026-10-27T00:25:17.000Z",
+    "published": true,
+    "showExcerptInArticleEn": true,
+    "categoryEn": "Essay, News",
+    "categoriesEn": [
+      "Essay",
+      "News"
+    ],
+    "topicsEn": [
+      "Mindfulness"
+    ],
+    "publishedEn": false,
+    "views": 0
+  },
+  {
+    "id": "1793057668920",
+    "title": "Заголовок статті 4",
+    "excerpt": "Короткий опис Короткий опис Короткий опис Короткий опис Короткий опис Короткий опис",
+    "showExcerptInArticle": true,
+    "content": "<div class=\"callout-box callout-info\" data-variant=\"info\" style=\"margin: 20px 0; padding: 16px; border-radius: 8px; border-left: 4px solid #38bdf8; background: #f0f9ff;\" bis_skin_checked=\"1\">\n        <div class=\"callout-title\" style=\"font-weight: 600; font-size: 13px; text-transform: uppercase; margin-bottom: 6px; color: #0369a1; letter-spacing: 0.05em;\" bis_skin_checked=\"1\">\n          До відома\n        </div>\n        <div class=\"callout-body\" style=\"color: #1f2937; line-height: 1.6;\" bis_skin_checked=\"1\">\n          Введіть текст повідомлення тут...\n        </div>\n      </div><blockquote style=\"border-left: 3px solid #000; padding-left: 16px; margin: 20px 0; font-style: italic; color: #1f2937;\">Текст редакційної цитати...</blockquote><p><br></p><br>",
+    "category": "Новини",
+    "categories": [
+      "Новини"
+    ],
+    "topics": [
+      "Усвідомленість"
+    ],
+    "author": "Редакція The Impart",
+    "date": "27 жовтня 2026 р.",
+    "createdAt": "2026-10-26T23:35:05.000Z",
+    "published": true,
+    "showExcerptInArticleEn": true,
+    "categoryEn": "Essay, News",
+    "categoriesEn": [
+      "Essay",
+      "News"
+    ],
+    "topicsEn": [
+      "Mindfulness"
+    ],
+    "publishedEn": false,
+    "views": 0
+  },
+  {
     "id": "1792966504448",
     "title": "Заголовок статті 3",
     "excerpt": "Короткий описКороткий описКороткий описКороткий описКороткий опис",
@@ -26,7 +171,7 @@
       "Form"
     ],
     "publishedEn": false,
-    "views": 1
+    "views": 3
   },
   {
     "id": "1792793653820",
@@ -57,93 +202,5 @@
     ],
     "publishedEn": false,
     "views": 7
-  },
-  {
-    "id": "1792791226628",
-    "title": "Заголовок статті новий",
-    "excerpt": "Короткий опис",
-    "showExcerptInArticle": false,
-    "content": "<div bis_skin_checked=\"1\">Apple може збільшити внутрішній дисплей iPhone Duo приблизно на півдюйма – таку інформацію отримав журналіст Bloomberg Марк Ґурман. Зміна торкнеться лише розміру екрана, а не лінійки загалом: жодного окремого “Max”-варіанта не планується.</div><div bis_skin_checked=\"1\"><br></div><div bis_skin_checked=\"1\">Ґурман поділився цими відомостями у своєму подкасті Power On. За його словами, <span class=\"tg-spoiler\" data-spoiler=\"true\">він “чув”, що Apple “розглядає” ідею майбутнього iPhone Duo з більшим внутрішнім дисплеєм. Нинішня модель має 7,6-дюймовий внутрішній екран і 5,4-дюймовий зовнішній.</span></div><div bis_skin_checked=\"1\"><br></div><div bis_skin_checked=\"1\">Точних параметрів Ґурман не називає, однак орієнтовний діапазон, за його даними, – від 7,9 до 8,1 дюйма. Він також уточнює, що збільшена версія залишиться в межах тієї самої лінійки iPhone Duo, а не стане окремою моделлю.</div>",
-    "category": "Новини",
-    "categories": [
-      "Новини"
-    ],
-    "topics": [
-      "Мінімалізм"
-    ],
-    "author": "Редакція The Impart",
-    "coverImage": "https://cdn.magicdecor.in/com/2023/02/29234001/image-1682163782-1982.jpg",
-    "date": "24 жовтня 2026 р.",
-    "createdAt": "2026-10-23T21:35:00.470Z",
-    "updatedAt": "2026-10-23T22:26:03.783Z",
-    "published": true,
-    "showExcerptInArticleEn": true,
-    "categoryEn": "Essay, News",
-    "categoriesEn": [
-      "Essay",
-      "News"
-    ],
-    "topicsEn": [
-      "Minimalism"
-    ],
-    "publishedEn": false,
-    "views": 10
-  },
-  {
-    "id": "1792602023813",
-    "title": "Тестова стаття 20:00",
-    "excerpt": "",
-    "showExcerptInArticle": true,
-    "content": "<div bis_skin_checked=\"1\"></div><span style=\"font-family: -apple-system, BlinkMacSystemFont, sans-serif;\"><div bis_skin_checked=\"1\">Apple може збільшити внутрішній дисплей iPhone Duo приблизно на півдюйма – таку інформацію отримав журналіст Bloomberg Марк Ґурман. Зміна торкнеться лише розміру екрана, а не лінійки загалом: жодного окремого “Max”-варіанта не планується.</div><div bis_skin_checked=\"1\"><br></div><div bis_skin_checked=\"1\">Ґурман поділився цими відомостями у своєму подкасті Power On. За його словами, він “чув”, що Apple “розглядає” ідею майбутнього iPhone Duo з більшим внутрішнім дисплеєм. Нинішня модель має 7,6-дюймовий внутрішній екран і 5,4-дюймовий зовнішній.</div><div bis_skin_checked=\"1\"><br></div><div bis_skin_checked=\"1\">Точних параметрів Ґурман не називає, однак орієнтовний діапазон, за його даними, – від 7,9 до 8,1 дюйма. Він також уточнює, що збільшена версія залишиться в межах тієї самої лінійки iPhone Duo, а не стане окремою моделлю.</div></span><div bis_skin_checked=\"1\"></div>",
-    "category": "Есе",
-    "categories": [
-      "Есе"
-    ],
-    "topics": [],
-    "author": "Редакція The Impart",
-    "coverImage": "https://cdn.magicdecor.in/com/2023/02/29234001/image-1682163782-1982.jpg",
-    "date": "21 жовтня 2026 р.",
-    "createdAt": "2026-10-21T17:00:37.705Z",
-    "updatedAt": "2026-10-23T20:38:05.728Z",
-    "published": true,
-    "showExcerptInArticleEn": true,
-    "categoryEn": "Essay",
-    "categoriesEn": [
-      "Essay"
-    ],
-    "topicsEn": [],
-    "publishedEn": false,
-    "views": 12
-  },
-  {
-    "id": "1792589447296",
-    "title": "Тестова стаття 17:15",
-    "excerpt": "Короткий опис",
-    "showExcerptInArticle": true,
-    "content": "Текст",
-    "category": "Новини",
-    "categories": [
-      "Новини"
-    ],
-    "topics": [
-      "Усвідомленість"
-    ],
-    "author": "Редакція The Impart",
-    "coverImage": "https://cdn.magicdecor.in/com/2023/02/29234001/image-1682163782-1982.jpg",
-    "date": "21 жовтня 2026 р.",
-    "createdAt": "2026-10-21T14:14:15.519Z",
-    "updatedAt": "2026-10-23T15:19:13.398Z",
-    "published": true,
-    "showExcerptInArticleEn": true,
-    "categoryEn": "Essay, News",
-    "categoriesEn": [
-      "Essay",
-      "News"
-    ],
-    "topicsEn": [
-      "Mindfulness"
-    ],
-    "publishedEn": false,
-    "views": 27
   }
 ]

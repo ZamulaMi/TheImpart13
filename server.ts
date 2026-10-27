@@ -17,6 +17,7 @@ import articleImageHandler from './api/_article_image';
 import renderPageHandler, { generatePageResponse } from './api/render-page';
 import sitemapHandler from './api/sitemap';
 import newsSitemapHandler from './api/news-sitemap';
+import { triggerSitemapAutoUpdate } from './api/_sitemap_sync';
 import { ROBOTS_TXT_BODY } from './api/_robots_txt';
 
 const __filename = fileURLToPath(import.meta.url);
@@ -26,6 +27,13 @@ dotenv.config({ override: true });
 
 // Завантаження збереженої статистики з Neon PostgreSQL при запуску сервера
 ensureStatsLoaded().catch(() => {});
+
+// Автоматична синхронізація sitemap.xml та news-sitemap.xml на диску та в кеші при старті
+triggerSitemapAutoUpdate();
+// Регулярна синхронізація щогодини (для актуалізації 48-годинного вікна Google News sitemap)
+setInterval(() => {
+  triggerSitemapAutoUpdate();
+}, 60 * 60 * 1000);
 
 const app = express();
 const PORT = 3000;

@@ -12,6 +12,7 @@ import {
   hasPublishedEnglishVersion,
 } from '../src/utils/seo.ts';
 import { invalidateSitemapCache } from './_sitemap_cache.ts';
+import { triggerSitemapAutoUpdate } from './_sitemap_sync.ts';
 
 export { getNeonSql, cleanConnectionString };
 
@@ -676,6 +677,7 @@ export async function saveArticle(article: Article): Promise<Article> {
   );
   fullArticle.views = preservedViews;
   invalidateSitemapCache();
+  triggerSitemapAutoUpdate();
   return fullArticle;
 }
 
@@ -700,6 +702,7 @@ export async function deleteArticle(id: string): Promise<boolean> {
   // 4. Оновлюємо файл на диску та в /tmp
   writeArticlesToFile(inMemoryArticles);
   invalidateSitemapCache();
+  triggerSitemapAutoUpdate();
 
   // 5. Синхронізуємо видалення з Neon (видаляємо рядок та оновлюємо site_settings)
   try {

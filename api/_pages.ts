@@ -5,6 +5,7 @@ import { verifyAdminToken, extractToken } from './_auth_utils.ts';
 import { initResponseHelpers, parseRequestBody } from './_helpers.ts';
 import { type SitePagesData, DEFAULT_PAGES_DATA } from '../src/types.ts';
 import { invalidateSitemapCache } from './_sitemap_cache.ts';
+import { triggerSitemapAutoUpdate } from './_sitemap_sync.ts';
 
 // Каталоги для локального збереження на сервері
 const DATA_DIR = path.resolve(process.cwd(), 'data');
@@ -159,6 +160,7 @@ export async function savePages(pagesInput: any): Promise<SitePagesData> {
   }
 
   invalidateSitemapCache();
+  triggerSitemapAutoUpdate();
   return cleaned;
 }
 

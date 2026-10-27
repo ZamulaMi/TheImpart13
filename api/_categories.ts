@@ -6,6 +6,7 @@ import { initResponseHelpers, parseRequestBody } from './_helpers.ts';
 import { DEFAULT_NAV_CATEGORIES } from '../src/utils/categories.ts';
 import type { NavigationCategory } from '../src/types.ts';
 import { invalidateSitemapCache } from './_sitemap_cache.ts';
+import { triggerSitemapAutoUpdate } from './_sitemap_sync.ts';
 
 const DATA_DIR = path.resolve(process.cwd(), 'data');
 const CATEGORIES_FILE = path.join(DATA_DIR, 'categories.json');
@@ -133,6 +134,7 @@ export async function saveNavCategories(categories: NavigationCategory[]): Promi
   }
 
   invalidateSitemapCache();
+  triggerSitemapAutoUpdate();
   return safeData;
 }
 
