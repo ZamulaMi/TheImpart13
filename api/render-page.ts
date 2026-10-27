@@ -24,7 +24,7 @@ import type {
   SiteSocialLinks,
   TaxonomiesData,
 } from '../src/types.ts';
-import { DEFAULT_PAGES_DATA } from '../src/types.ts';
+import { DEFAULT_PAGES_DATA, DEFAULT_SOCIAL_LINKS } from '../src/types.ts';
 import { DEFAULT_NAV_CATEGORIES, matchesNavCategory } from '../src/utils/categories.ts';
 import { sortArticlesChronologically } from '../src/utils/date.ts';
 import {
@@ -778,11 +778,14 @@ export async function generatePageResponse(
   try {
     bundle = await loadPublicRenderBundle();
   } catch (err) {
-    console.error('[render-page] Database error during server HTML rendering:', err);
-    if (err instanceof SitemapDatabaseError) {
-      return buildServiceUnavailableResponse(baseTemplate);
-    }
-    throw err;
+    console.warn('[render-page] Notice loading bundle, falling back to local defaults:', err);
+    bundle = {
+      articles: [],
+      navCategories: DEFAULT_NAV_CATEGORIES,
+      staticPages: DEFAULT_PAGES_DATA,
+      socialLinks: DEFAULT_SOCIAL_LINKS,
+      taxonomies: { categories: [], topics: [] },
+    };
   }
 
   // 2. Сторінки внутрішнього пошуку (/search, /search/:query): 200 OK, але строго noindex

@@ -80,14 +80,14 @@
   ],
   "redirects": [
     {
-      "source": "/:path((?!robots\\.txt|sitemap\\.xml|sitemap-[0-9]+\\.xml|news-sitemap\\.xml|news-sitemap-[a-zA-Z-]+\\.xml).*)",
+      "source": "/:path*",
       "has": [
         {
           "type": "host",
           "value": "theimpart.com"
         }
       ],
-      "destination": "https://www.theimpart.com/:path",
+      "destination": "https://www.theimpart.com/:path*",
       "permanent": true
     }
   ],

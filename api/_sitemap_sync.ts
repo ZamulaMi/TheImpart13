@@ -60,6 +60,9 @@ export async function syncSitemapFilesToDisk(): Promise<{
         try {
           fs.writeFileSync(path.join(publicDir, `sitemap-${idx + 1}.xml`), partXml, 'utf-8');
           fs.writeFileSync(path.join(tmpDir, `sitemap-${idx + 1}.xml`), partXml, 'utf-8');
+          if (fs.existsSync(distDir)) {
+            fs.writeFileSync(path.join(distDir, `sitemap-${idx + 1}.xml`), partXml, 'utf-8');
+          }
         } catch {}
       });
     }

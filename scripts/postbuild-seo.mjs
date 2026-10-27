@@ -33,9 +33,8 @@ async function runPostBuild() {
     console.log('[postbuild-seo] Copied public/robots.txt -> dist/robots.txt');
   }
 
-  // 3. Актуалізація фізичних public/sitemap.xml та public/news-sitemap.xml
-  // Та видалення dist/sitemap*.xml і dist/news-sitemap*.xml, щоб Vercel не віддавав застиглу статику,
-  // а натомість спрямовував запити на динамічні /api/sitemap та /api/news-sitemap
+  // 3. Генерація актуальних sitemap.xml та news-sitemap.xml
+  // Записуємо у public/ та dist/, щоб і статичний CDN, і динамічні роути завжди гарантовано віддавали 200 OK
   try {
     const { fetchSitemapSourceData, collectSitemapEntries, buildSitemapDocuments } = await import('../api/sitemap.ts');
     const sourceData = await fetchSitemapSourceData();
@@ -43,9 +42,17 @@ async function runPostBuild() {
     const docs = buildSitemapDocuments(sitemapEntries);
 
     fs.writeFileSync(path.resolve(process.cwd(), 'public', 'sitemap.xml'), docs.rootXml, 'utf-8');
-    console.log(`[postbuild-seo] Updated public/sitemap.xml with ${sitemapEntries.length} entries.`);
+    fs.writeFileSync(path.join(distDir, 'sitemap.xml'), docs.rootXml, 'utf-8');
+    console.log(`[postbuild-seo] Updated sitemap.xml in public/ and dist/ with ${sitemapEntries.length} entries.`);
+
+    if (docs.isIndex && docs.partsXml.length > 0) {
+      docs.partsXml.forEach((partXml, idx) => {
+        fs.writeFileSync(path.join(distDir, `sitemap-${idx + 1}.xml`), partXml, 'utf-8');
+        fs.writeFileSync(path.resolve(process.cwd(), 'public', `sitemap-${idx + 1}.xml`), partXml, 'utf-8');
+      });
+    }
   } catch (err) {
-    console.warn('[postbuild-seo] Notice: static sitemap generation notice (runtime handler ready):', err);
+    console.warn('[postbuild-seo] Notice: sitemap generation notice (runtime handler ready):', err);
   }
 
   try {
@@ -56,23 +63,10 @@ async function runPostBuild() {
     const newsXml = renderNewsSitemapXml(newsEntries);
 
     fs.writeFileSync(path.resolve(process.cwd(), 'public', 'news-sitemap.xml'), newsXml, 'utf-8');
-    console.log(`[postbuild-seo] Updated public/news-sitemap.xml with ${newsEntries.length} entries.`);
+    fs.writeFileSync(path.join(distDir, 'news-sitemap.xml'), newsXml, 'utf-8');
+    console.log(`[postbuild-seo] Updated news-sitemap.xml in public/ and dist/ with ${newsEntries.length} entries.`);
   } catch (err) {
-    console.warn('[postbuild-seo] Notice: static news-sitemap generation notice (runtime handler ready):', err);
-  }
-
-  // Очищення dist від статичних XML sitemap, які Vite скопіював з public/
-  // Це критично для Vercel: інакше Vercel Edge віддаватиме старі файли з dist замість запуску /api/sitemap
-  try {
-    const distFiles = fs.readdirSync(distDir);
-    for (const file of distFiles) {
-      if (/^(?:news-)?sitemap.*\.xml$/i.test(file)) {
-        fs.unlinkSync(path.join(distDir, file));
-        console.log(`[postbuild-seo] Removed dist/${file} to allow dynamic /api/sitemap serverless handling.`);
-      }
-    }
-  } catch (err) {
-    console.warn('[postbuild-seo] Notice during dist sitemap cleanup:', err);
+    console.warn('[postbuild-seo] Notice: news-sitemap generation notice (runtime handler ready):', err);
   }
 
   // 4. Пре-рендеримо головну сторінку у dist/index.html з реальних даних БД (якщо доступно під час білду)

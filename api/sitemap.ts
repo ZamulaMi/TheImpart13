@@ -223,75 +223,70 @@ export async function fetchSitemapSourceData(): Promise<SitemapSourceData> {
 
   const articles = await fetchArticlesStrict();
 
+  let categories: NavigationCategory[] = [...DEFAULT_NAV_CATEGORIES];
+  let pagesUpdatedAt: { about?: string; contacts?: string } = {};
+  let staticPages: SitePagesData = {
+    about: { ...DEFAULT_PAGES_DATA.about },
+    contacts: { ...DEFAULT_PAGES_DATA.contacts },
+  };
+
   if (hasConfiguredDatabaseEnv()) {
-    const sql = getNeonSql();
-    if (!sql) {
-      throw new SitemapDatabaseError(
-        'Змінна підключення до бази даних задана некоректно — неможливо ініціалізувати клієнт БД'
-      );
-    }
-
-    let categories: NavigationCategory[] = [...DEFAULT_NAV_CATEGORIES];
-    let pagesUpdatedAt: { about?: string; contacts?: string } = {};
-    let staticPages: SitePagesData = {
-      about: { ...DEFAULT_PAGES_DATA.about },
-      contacts: { ...DEFAULT_PAGES_DATA.contacts },
-    };
-
     try {
-      const settingRows = await executeStrictSql<any[]>(sql, async (client) => {
-        return await client`
-          SELECT key, value, updated_at AS "updatedAt"
-          FROM site_settings
-          WHERE key IN ('nav_categories', 'static_pages');
-        `;
-      });
+      const sql = getNeonSql();
+      if (sql) {
+        const settingRows = await executeStrictSql<any[]>(sql, async (client) => {
+          return await client`
+            SELECT key, value, updated_at AS "updatedAt"
+            FROM site_settings
+            WHERE key IN ('nav_categories', 'static_pages');
+          `;
+        }, 4000);
 
-      for (const row of settingRows || []) {
-        if (row.key === 'nav_categories' && row.value) {
-          const parsed = typeof row.value === 'string' ? JSON.parse(row.value) : row.value;
-          if (Array.isArray(parsed) && parsed.length > 0) {
-            categories = parsed;
-          }
-        } else if (row.key === 'static_pages' && row.value) {
-          const parsed = typeof row.value === 'string' ? JSON.parse(row.value) : row.value;
-          if (parsed && typeof parsed === 'object') {
-            staticPages = {
-              about: { ...DEFAULT_PAGES_DATA.about, ...(parsed.about || {}) },
-              contacts: { ...DEFAULT_PAGES_DATA.contacts, ...(parsed.contacts || {}) },
+        for (const row of settingRows || []) {
+          if (row.key === 'nav_categories' && row.value) {
+            const parsed = typeof row.value === 'string' ? JSON.parse(row.value) : row.value;
+            if (Array.isArray(parsed) && parsed.length > 0) {
+              categories = parsed;
+            }
+          } else if (row.key === 'static_pages' && row.value) {
+            const parsed = typeof row.value === 'string' ? JSON.parse(row.value) : row.value;
+            if (parsed && typeof parsed === 'object') {
+              staticPages = {
+                about: { ...DEFAULT_PAGES_DATA.about, ...(parsed.about || {}) },
+                contacts: { ...DEFAULT_PAGES_DATA.contacts, ...(parsed.contacts || {}) },
+              };
+            }
+            pagesUpdatedAt = {
+              about: toValidIso8601(parsed?.about?.updatedAt || (row.updatedAt ? new Date(row.updatedAt).toISOString() : undefined)),
+              contacts: toValidIso8601(parsed?.contacts?.updatedAt || (row.updatedAt ? new Date(row.updatedAt).toISOString() : undefined)),
             };
           }
-          pagesUpdatedAt = {
-            about: toValidIso8601(parsed?.about?.updatedAt || (row.updatedAt ? new Date(row.updatedAt).toISOString() : undefined)),
-            contacts: toValidIso8601(parsed?.contacts?.updatedAt || (row.updatedAt ? new Date(row.updatedAt).toISOString() : undefined)),
-          };
         }
+
+        return {
+          articles,
+          categories,
+          pagesUpdatedAt,
+          staticPages,
+        };
       }
     } catch (err: any) {
-      console.warn('Neon site_settings query in sitemap fallback to defaults:', err?.message || err);
+      console.warn('Neon query notice in sitemap, falling back to local files:', err?.message || err);
     }
-
-    return {
-      articles,
-      categories,
-      pagesUpdatedAt,
-      staticPages,
-    };
   }
 
   // Режим локального серверного сховища (коли зовнішня СУБД не підключена у змінних середовища)
   const localCategoriesRaw = readJsonFileStrict<NavigationCategory[]>(categoriesPaths, 'categories');
-  const categories =
-    Array.isArray(localCategoriesRaw) && localCategoriesRaw.length > 0
-      ? localCategoriesRaw
-      : [...DEFAULT_NAV_CATEGORIES];
+  if (Array.isArray(localCategoriesRaw) && localCategoriesRaw.length > 0) {
+    categories = localCategoriesRaw;
+  }
 
   const localPagesRaw = readJsonFileStrict<any>(pagesPaths, 'pages');
-  const staticPages: SitePagesData = {
+  staticPages = {
     about: { ...DEFAULT_PAGES_DATA.about, ...(localPagesRaw?.about || {}) },
     contacts: { ...DEFAULT_PAGES_DATA.contacts, ...(localPagesRaw?.contacts || {}) },
   };
-  const pagesUpdatedAt = {
+  pagesUpdatedAt = {
     about: toValidIso8601(localPagesRaw?.about?.updatedAt),
     contacts: toValidIso8601(localPagesRaw?.contacts?.updatedAt),
   };
