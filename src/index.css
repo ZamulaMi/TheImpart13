@@ -8,6 +8,11 @@
 
 html {
   scrollbar-gutter: stable;
+  overflow-x: clip;
+}
+
+body {
+  overflow-x: clip;
 }
 
 html.dark {
@@ -619,5 +624,51 @@ html.dark .callout-quote {
   color: #111827 !important;
   background-color: #ffffff !important;
 }
+
+/* ========================================================================== */
+/* МОБІЛЬНА ВЕРСІЯ ДЛЯ ФОТОГРАФІЙ У СТАТТІ: ПОВНА ШИРИНА БЕЗ ВІДСТУПІВ         */
+/* ========================================================================== */
+@media (max-width: 639px) {
+  /* Головна обкладинка та всі фото/галереї займають 100% ширини екрана */
+  .article-full-mobile,
+  .article-rendered-html figure,
+  .article-rendered-html .article-image,
+  .article-rendered-html .article-carousel-wrapper,
+  .article-view-content figure,
+  .article-view-content .article-image,
+  figure.article-image {
+    width: 100vw !important;
+    max-width: 100vw !important;
+    margin-left: calc(50% - 50vw) !important;
+    margin-right: calc(50% - 50vw) !important;
+    border-radius: 0 !important;
+    border-left: none !important;
+    border-right: none !important;
+  }
+
+  .article-full-mobile img,
+  .article-full-mobile > div,
+  .article-rendered-html figure img,
+  .article-rendered-html .article-image img,
+  .article-view-content figure img,
+  figure.article-image img,
+  .article-carousel-wrapper,
+  .article-carousel-wrapper > div {
+    border-radius: 0 !important;
+    width: 100% !important;
+    max-width: 100vw !important;
+    border-left: none !important;
+    border-right: none !important;
+  }
+
+  .article-full-mobile figcaption,
+  .article-rendered-html figcaption,
+  .article-view-content figcaption,
+  .article-carousel-wrapper figcaption {
+    padding-left: 1rem !important;
+    padding-right: 1rem !important;
+  }
+}
+
 
 

@@ -958,26 +958,28 @@ export async function generatePageResponse(
     const rootHtml = `<div class="min-h-screen w-full bg-white dark:bg-[#222222] text-black dark:text-[#cbcbcb] flex flex-col justify-between">
   ${renderServerHeaderHtml(bundle.navCategories, effectiveIsEn)}
   <main class="flex-1">
-    <article class="w-[92%] sm:w-[90%] md:max-w-3xl mx-auto py-8 sm:py-16">
-      <div class="mb-6 text-xs uppercase tracking-wider text-neutral-500 dark:text-[#a0a0a0]">
-        <a href="${effectiveIsEn ? '/?lang=en' : '/'}" class="no-underline">${effectiveIsEn ? '← All materials' : '← Усі матеріали'}</a>
-        ${section ? ` <span>•</span> <span>${escapeHtml(section)}</span>` : ''}
-      </div>
-      <h1 class="text-3xl sm:text-4xl md:text-5xl font-sans font-bold tracking-tight text-black dark:text-[#f5f5f5] leading-tight mb-6">${escapeHtml(cleanTitle)}</h1>
-      <div class="flex flex-wrap items-center justify-between gap-3 py-4 border-y border-neutral-100 dark:border-[#333333] mb-8 text-xs text-neutral-500 dark:text-[#888888]">
-        ${cleanAuthor ? `<span>${escapeHtml(cleanAuthor)}</span>` : ''}
-        ${
-          publishedTime
-            ? `<time datetime="${escapeHtml(publishedTime)}">${escapeHtml(article.date || publishedTime)}</time>`
-            : article.date
-            ? `<span>${escapeHtml(article.date)}</span>`
-            : ''
-        }
+    <article class="w-full pt-1.5 sm:pt-3.5 pb-12 sm:pb-20">
+      <div class="w-[92%] sm:w-[90%] md:w-[calc(26/34*100%)] max-w-3xl mx-auto">
+        <div class="mb-2 sm:mb-2.5 text-xs uppercase tracking-wider text-neutral-500 dark:text-[#a0a0a0]">
+          <a href="${effectiveIsEn ? '/?lang=en' : '/'}" class="no-underline">${effectiveIsEn ? '← All materials' : '← Усі матеріали'}</a>
+          ${section ? ` <span>•</span> <span>${escapeHtml(section)}</span>` : ''}
+        </div>
+        <div class="flex flex-wrap items-center justify-between gap-2.5 text-xs text-neutral-500 dark:text-[#888888] font-sans pt-0.5 pb-2 mb-2 sm:mb-2.5">
+          ${cleanAuthor ? `<span class="font-medium text-neutral-700 dark:text-[#b0b0b0]">${escapeHtml(cleanAuthor)}</span>` : ''}
+          ${
+            publishedTime
+              ? `<time datetime="${escapeHtml(publishedTime)}">${escapeHtml(article.date || publishedTime)}</time>`
+              : article.date
+              ? `<span>${escapeHtml(article.date)}</span>`
+              : ''
+          }
+        </div>
+        <h1 class="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-sans font-bold tracking-tight text-black dark:text-[#f5f5f5] leading-tight mb-5 sm:mb-7">${escapeHtml(cleanTitle)}</h1>
       </div>
       ${
         coverSrc
-          ? `<figure class="mb-10 -mx-3 sm:-mx-8 md:-mx-14 lg:-mx-20">
-        <div class="w-full aspect-[26/14.5] overflow-hidden bg-neutral-100 dark:bg-[#181818] rounded-xl sm:rounded-2xl border border-transparent dark:border-[#2e2e2e]">
+          ? `<figure class="mb-8 sm:mb-10 w-full sm:w-[calc(26/34*100%)] mx-auto article-full-mobile">
+        <div class="w-full aspect-[26/14.5] overflow-hidden bg-neutral-100 dark:bg-[#181818] rounded-none sm:rounded-xl md:rounded-2xl border-y sm:border border-transparent dark:border-[#2e2e2e] shadow-xs">
           <img src="${escapeHtml(coverSrc)}" alt="${escapeHtml(cleanTitle)}" width="1600" height="892" fetchpriority="high" decoding="async" class="w-full h-full object-cover" />
         </div>
         ${
@@ -988,26 +990,28 @@ export async function generatePageResponse(
       </figure>`
           : ''
       }
-      ${
-        cleanExcerpt
-          ? `<p class="text-lg sm:text-xl text-neutral-700 dark:text-[#e0e0e0] leading-relaxed font-sans italic mb-8 border-l-2 border-black dark:border-[#cbcbcb] pl-6">${escapeHtml(cleanExcerpt)}</p>`
-          : ''
-      }
-      <div class="prose prose-neutral dark:prose-invert max-w-none text-base sm:text-lg leading-relaxed text-neutral-800 dark:text-[#cbcbcb] space-y-6">
-        ${renderedBodyHtml}
+      <div class="w-[92%] sm:w-[90%] md:max-w-3xl mx-auto">
+        ${
+          cleanExcerpt
+            ? `<p class="text-lg sm:text-xl text-neutral-700 dark:text-[#e0e0e0] leading-relaxed font-sans italic mb-8 border-l-2 border-black dark:border-[#cbcbcb] pl-6">${escapeHtml(cleanExcerpt)}</p>`
+            : ''
+        }
+        <div class="prose prose-neutral dark:prose-invert max-w-none text-base sm:text-lg leading-relaxed text-neutral-800 dark:text-[#cbcbcb] space-y-6 article-view-content">
+          ${renderedBodyHtml}
+        </div>
+        ${
+          displayTopics.length > 0
+            ? `<div class="mt-12 pt-6 border-t border-neutral-100 dark:border-[#333333] flex flex-wrap gap-2">
+          ${displayTopics
+            .map(
+              (t) =>
+                `<a href="/search/${encodeURIComponent(t)}" class="px-3 py-1 text-xs rounded-md bg-neutral-100 dark:bg-[#1a1a1a] no-underline">#${escapeHtml(t)}</a>`
+            )
+            .join('')}
+        </div>`
+            : ''
+        }
       </div>
-      ${
-        displayTopics.length > 0
-          ? `<div class="mt-12 pt-6 border-t border-neutral-100 dark:border-[#333333] flex flex-wrap gap-2">
-        ${displayTopics
-          .map(
-            (t) =>
-              `<a href="/search/${encodeURIComponent(t)}" class="px-3 py-1 text-xs rounded-md bg-neutral-100 dark:bg-[#1a1a1a] no-underline">#${escapeHtml(t)}</a>`
-          )
-          .join('')}
-      </div>`
-          : ''
-      }
     </article>
   </main>
   ${renderServerFooterHtml(effectiveIsEn)}

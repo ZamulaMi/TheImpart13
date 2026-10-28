@@ -203,108 +203,118 @@ export const ArticleView: React.FC<ArticleViewProps> = ({
     : article.coverImageCaption;
 
   return (
-    <article className="w-[92%] sm:w-[90%] md:max-w-3xl mx-auto py-8 sm:py-16 animate-article-fade-in">
-      {/* Верхня навігація та рубрики статті */}
-      <div className="flex flex-wrap items-center justify-between gap-3 mb-8 sm:mb-10">
-        <div className="flex flex-wrap items-center gap-2 sm:gap-2.5">
-          <a
-            href="/"
-            onClick={(e) => {
-              if (!e.ctrlKey && !e.metaKey && !e.shiftKey && !e.altKey && e.button === 0) {
-                e.preventDefault();
-                onBack();
-              }
-            }}
-            className="inline-flex items-center gap-2 text-xs uppercase tracking-wider text-neutral-500 dark:text-[#a0a0a0] hover:text-black dark:hover:text-white transition-colors cursor-pointer group no-underline shrink-0"
-          >
-            <ArrowLeft className="w-3.5 h-3.5 group-hover:-translate-x-1 transition-transform" />
-            <span>{isEn ? 'All materials' : 'Усі матеріали'}</span>
-          </a>
+    <article className="w-full pt-1.5 sm:pt-3.5 pb-12 sm:pb-20 animate-article-fade-in">
+      {/* Верхній блок: Навігація ("Усі матеріали" + рубрики), Метадані та Заголовок статті */}
+      <div className="w-[92%] sm:w-[90%] md:w-[calc(26/34*100%)] max-w-3xl mx-auto">
+        {/* Верхня навігація та рубрики статті */}
+        <div className="flex flex-wrap items-center justify-between gap-2.5 mb-2 sm:mb-2.5">
+          <div className="flex flex-wrap items-center gap-2 sm:gap-2.5">
+            <a
+              href="/"
+              onClick={(e) => {
+                if (!e.ctrlKey && !e.metaKey && !e.shiftKey && !e.altKey && e.button === 0) {
+                  e.preventDefault();
+                  onBack();
+                }
+              }}
+              className="inline-flex items-center gap-1.5 text-xs uppercase tracking-wider text-neutral-500 dark:text-[#a0a0a0] hover:text-black dark:hover:text-white transition-colors cursor-pointer group no-underline shrink-0"
+            >
+              <ArrowLeft className="w-3.5 h-3.5 group-hover:-translate-x-1 transition-transform" />
+              <span>{isEn ? 'All materials' : 'Усі матеріали'}</span>
+            </a>
 
-          {categoriesList.length > 0 && (
-            <>
-              <span className="text-neutral-300 dark:text-neutral-700 select-none">•</span>
-              <div className="flex flex-wrap items-center gap-1.5 sm:gap-2 text-xs uppercase tracking-wider">
-                {categoriesList.map((cat, idx) => {
-                  const lower = cat.trim().toLowerCase();
-                  const targetHref =
-                    lower === 'новини' || lower === 'новина' || lower === 'news'
-                      ? '/news'
-                      : ['обзори', 'огляди', 'обзор', 'огляд', 'reviews', 'review'].includes(lower)
-                      ? '/reviews'
-                      : ['статті', 'стаття', 'articles', 'article'].includes(lower)
-                      ? '/articles'
-                      : `/search/${encodeURIComponent(cat)}`;
-                  return (
-                    <a
-                      key={`cat_${idx}`}
-                      href={targetHref}
-                      onClick={(e) => {
-                        if (!e.ctrlKey && !e.metaKey && !e.shiftKey && !e.altKey && e.button === 0) {
-                          e.preventDefault();
-                          onSelectCategory?.(cat);
-                        }
-                      }}
-                      className="font-medium text-neutral-800 dark:text-[#cbcbcb] hover:text-black dark:hover:text-white bg-neutral-100 dark:bg-[#1a1a1a] hover:bg-neutral-200 dark:hover:bg-[#252525] border border-transparent dark:border-[#333333] px-2.5 py-0.5 rounded cursor-pointer transition-colors no-underline"
-                      title={isEn ? `Go to rubric ${cat}` : `Перейти до рубрики ${cat}`}
-                    >
-                      {cat}
-                    </a>
-                  );
-                })}
-              </div>
-            </>
-          )}
-        </div>
+            {categoriesList.length > 0 && (
+              <>
+                <span className="text-neutral-300 dark:text-neutral-700 select-none">•</span>
+                <div className="flex flex-wrap items-center gap-1.5 sm:gap-2 text-xs uppercase tracking-wider">
+                  {categoriesList.map((cat, idx) => {
+                    const lower = cat.trim().toLowerCase();
+                    const targetHref =
+                      lower === 'новини' || lower === 'новина' || lower === 'news'
+                        ? '/news'
+                        : ['обзори', 'огляди', 'обзор', 'огляд', 'reviews', 'review'].includes(lower)
+                        ? '/reviews'
+                        : ['статті', 'стаття', 'articles', 'article'].includes(lower)
+                        ? '/articles'
+                        : `/search/${encodeURIComponent(cat)}`;
+                    return (
+                      <a
+                        key={`cat_${idx}`}
+                        href={targetHref}
+                        onClick={(e) => {
+                          if (!e.ctrlKey && !e.metaKey && !e.shiftKey && !e.altKey && e.button === 0) {
+                            e.preventDefault();
+                            onSelectCategory?.(cat);
+                          }
+                        }}
+                        className="font-medium text-neutral-800 dark:text-[#cbcbcb] hover:text-black dark:hover:text-white bg-neutral-100 dark:bg-[#1a1a1a] hover:bg-neutral-200 dark:hover:bg-[#252525] border border-transparent dark:border-[#333333] px-2.5 py-0.5 rounded cursor-pointer transition-colors no-underline"
+                        title={isEn ? `Go to rubric ${cat}` : `Перейти до рубрики ${cat}`}
+                      >
+                        {cat}
+                      </a>
+                    );
+                  })}
+                </div>
+              </>
+            )}
+          </div>
 
-        <div className="flex items-center gap-2">
-          {/* Якщо користувач перемкнувся на англійську, але стаття ще не перекладена */}
-          {isEn && !hasEnVersion && (
-            <span className="inline-flex items-center gap-1.5 text-xs text-amber-700 dark:text-amber-300 bg-amber-50 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-800/40 px-2.5 py-1 rounded">
-              <Globe className="w-3.5 h-3.5" />
-              <span>English version coming soon (showing UA)</span>
-            </span>
-          )}
-
-          {isHidden && (
-            <span className="inline-flex items-center gap-1.5 text-xs font-medium text-neutral-600 dark:text-[#cbcbcb] bg-neutral-100 dark:bg-[#252525] border border-neutral-200 dark:border-[#333333] px-3 py-1 rounded">
-              <EyeOff className="w-3.5 h-3.5 text-neutral-500 dark:text-[#888888]" />
-              <span>
-                {isEn ? 'Draft preview' : 'Прихована стаття (попередній перегляд)'}
+          <div className="flex items-center gap-2">
+            {/* Якщо користувач перемкнувся на англійську, але стаття ще не перекладена */}
+            {isEn && !hasEnVersion && (
+              <span className="inline-flex items-center gap-1.5 text-xs text-amber-700 dark:text-amber-300 bg-amber-50 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-800/40 px-2.5 py-1 rounded">
+                <Globe className="w-3.5 h-3.5" />
+                <span>English version coming soon (showing UA)</span>
               </span>
+            )}
+
+            {isHidden && (
+              <span className="inline-flex items-center gap-1.5 text-xs font-medium text-neutral-600 dark:text-[#cbcbcb] bg-neutral-100 dark:bg-[#252525] border border-neutral-200 dark:border-[#333333] px-3 py-1 rounded">
+                <EyeOff className="w-3.5 h-3.5 text-neutral-500 dark:text-[#888888]" />
+                <span>
+                  {isEn ? 'Draft preview' : 'Прихована стаття (попередній перегляд)'}
+                </span>
+              </span>
+            )}
+          </div>
+        </div>
+
+        {/* Автор, дата та перегляди: переміщено між "усі матеріали" та назвою зі зменшеним простором */}
+        <div className="flex flex-wrap items-center justify-between gap-2.5 text-xs text-neutral-500 dark:text-[#888888] font-sans pt-0.5 pb-2 mb-2 sm:mb-2.5">
+          <span className="font-medium text-neutral-700 dark:text-[#b0b0b0]">{article.author}</span>
+          <div className="flex items-center gap-2.5">
+            {publishedIso ? (
+              <time dateTime={publishedIso}>{timeDisplay}</time>
+            ) : (
+              <span>{timeDisplay}</span>
+            )}
+            <span className="text-neutral-300 dark:text-neutral-700 select-none">•</span>
+            <span
+              className="inline-flex items-center gap-1.5 text-neutral-700 dark:text-[#cbcbcb] font-medium"
+              title={isEn ? 'Total article views' : 'Загальна кількість переглядів статті'}
+            >
+              <Eye className="w-3.5 h-3.5 text-neutral-400 dark:text-[#888888]" />
+              <span>{formatViews(views, isEn)}</span>
             </span>
-          )}
+          </div>
         </div>
+
+        {/* Заголовок статті */}
+        <h1
+          className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-sans font-bold tracking-tight text-black dark:text-[#f5f5f5] leading-tight mb-5 sm:mb-7"
+        >
+          {title}
+        </h1>
       </div>
 
-      {/* Заголовок статті (шрифт як у рубрик у header — сучасний sans / гротеск) */}
-      <h1
-        className="text-3xl sm:text-4xl md:text-5xl font-sans font-bold tracking-tight text-black dark:text-[#f5f5f5] leading-tight mb-6"
-      >
-        {title}
-      </h1>
-
-      {/* Автор, дата та загальна кількість переглядів */}
-      <div className="flex flex-wrap items-center justify-between gap-3 py-4 border-y border-neutral-100 dark:border-[#333333] mb-8 text-xs text-neutral-500 dark:text-[#888888]">
-        <span>{article.author}</span>
-        <div className="flex items-center gap-3">
-          {publishedIso ? (
-            <time dateTime={publishedIso}>{timeDisplay}</time>
-          ) : (
-            <span>{timeDisplay}</span>
-          )}
-          <span className="text-neutral-300 dark:text-neutral-700">•</span>
-          <span className="inline-flex items-center gap-1.5 text-neutral-700 dark:text-[#cbcbcb] font-medium" title={isEn ? 'Total article views' : 'Загальна кількість переглядів статті'}>
-            <Eye className="w-3.5 h-3.5 text-neutral-400 dark:text-[#888888]" />
-            <span>{formatViews(views, isEn)}</span>
-          </span>
-        </div>
-      </div>
-
-      {/* Головна обкладинка статті: формат 26:14.5 у середині статті */}
+      {/* Головна обкладинка статті:
+          - На мобільній версії: займає всю ширину без відступів (w-full edge-to-edge, rounded-none)
+          - На планшетах/десктопі: займає 26 пунктів з 34 з відступами по 4 пункти з країв (w-[calc(26/34*100%)] mx-auto, rounded-xl/2xl)
+          - Пропорції: 26 на 14.5
+      */}
       {article.coverImage && (
-        <figure className="mb-10 -mx-3 sm:-mx-8 md:-mx-14 lg:-mx-20">
-          <div className="w-full aspect-[26/14.5] overflow-hidden bg-neutral-100 dark:bg-[#181818] rounded-xl sm:rounded-2xl border border-transparent dark:border-[#2e2e2e] shadow-xs">
+        <figure className="mb-8 sm:mb-10 w-full sm:w-[calc(26/34*100%)] mx-auto article-full-mobile">
+          <div className="w-full aspect-[26/14.5] overflow-hidden bg-neutral-100 dark:bg-[#181818] rounded-none sm:rounded-xl md:rounded-2xl border-y sm:border border-transparent dark:border-[#2e2e2e] shadow-xs">
             <img
               src={article.coverImage}
               alt={title}
@@ -323,17 +333,19 @@ export const ArticleView: React.FC<ArticleViewProps> = ({
         </figure>
       )}
 
-      {/* Лід / короткий опис */}
-      {showExcerpt && excerpt && (
-        <p className="text-lg sm:text-xl text-neutral-700 dark:text-[#e0e0e0] leading-relaxed font-sans italic mb-8 border-l-2 border-black dark:border-[#cbcbcb] pl-6">
-          {excerpt}
-        </p>
-      )}
+      {/* Основний вміст статті: лід, текст, галереї */}
+      <div className="w-[92%] sm:w-[90%] md:max-w-3xl mx-auto">
+        {/* Лід / короткий опис */}
+        {showExcerpt && excerpt && (
+          <p className="text-lg sm:text-xl text-neutral-700 dark:text-[#e0e0e0] leading-relaxed font-sans italic mb-8 border-l-2 border-black dark:border-[#cbcbcb] pl-6">
+            {excerpt}
+          </p>
+        )}
 
-      {/* Рендеринг тексту з медіа */}
-      <div className="prose prose-neutral dark:prose-invert max-w-none text-base sm:text-lg leading-relaxed text-neutral-800 dark:text-[#cbcbcb]">
-        <ContentRenderer content={content} />
-      </div>
+        {/* Рендеринг тексту з медіа */}
+        <div className="prose prose-neutral dark:prose-invert max-w-none text-base sm:text-lg leading-relaxed text-neutral-800 dark:text-[#cbcbcb] article-view-content">
+          <ContentRenderer content={content} />
+        </div>
 
       {/* Теми статті внизу матеріалу */}
       {topics && topics.length > 0 && (
@@ -361,6 +373,7 @@ export const ArticleView: React.FC<ArticleViewProps> = ({
           </div>
         </div>
       )}
+      </div>
     </article>
   );
 };
