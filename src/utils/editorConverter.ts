@@ -37,6 +37,24 @@ export function markdownToHtml(md: string): string {
     return `<div class="article-video-wrapper" style="margin: 24px 0; aspect-ratio: 16/9; background: #000; border-radius: 8px; overflow: hidden;"><iframe src="https://www.youtube.com/embed/${vid}" style="width: 100%; height: 100%; border: 0;" allowfullscreen></iframe></div>`;
   });
 
+  // 2.5. Карусель фото: [carousel caption="..."]...[/carousel]
+  html = html.replace(
+    /\[carousel(?:\s+caption="(.*?)")?\]([\s\S]*?)\[\/carousel\]/gi,
+    (_, overallCaption, body) => {
+      const slides: Array<{ url: string; caption?: string }> = [];
+      const slideMatches = body.matchAll(/\[(?:slide|photo|image):\s*([^\s\]]+)(?:\s+"(.*?)")?\]/gi);
+      for (const m of slideMatches) {
+        slides.push({ url: m[1].trim(), caption: m[2]?.trim() || undefined });
+      }
+      if (slides.length === 0) return '';
+      const encodedJson = JSON.stringify(slides).replace(/"/g, '&quot;');
+      const encodedCap = (overallCaption || '').replace(/"/g, '&quot;');
+      const firstImg = slides[0];
+      const captionText = firstImg.caption || overallCaption || '';
+      return `<figure class="article-carousel" data-carousel-images="${encodedJson}" data-carousel-caption="${encodedCap}" style="margin: 32px 0; text-align: center;"><div class="carousel-container" style="position: relative; max-width: 100%; border-radius: 8px; overflow: hidden;"><img src="${firstImg.url}" alt="${captionText}" style="max-width: 100%; max-height: 620px; border-radius: 8px; margin: 0 auto; display: block;" /><div class="carousel-counter" style="position: absolute; top: 12px; right: 12px; background: rgba(0,0,0,0.65); color: #fff; padding: 4px 10px; border-radius: 6px; font-size: 12px; font-family: monospace;">1 / ${slides.length}</div></div>${captionText ? `<figcaption style="text-align: center; font-size: 13px; color: #6b7280; font-style: italic; margin-top: 8px;">${captionText}</figcaption>` : ''}</figure>`;
+    }
+  );
+
   // 3. Зображення: ![alt](src) або [photo: src "alt"]
   html = html.replace(/!\[(.*?)\]\((.*?)\)/g, (_, alt, src) => {
     const caption = alt ? `<figcaption style="text-align: center; font-size: 13px; color: #6b7280; font-style: italic; margin-top: 8px;">${alt}</figcaption>` : '';
@@ -230,6 +248,20 @@ export function htmlToMarkdown(html: string): string {
         return `\n\n![${alt}](${src})\n\n`;
       }
       case 'figure': {
+        if (el.classList.contains('article-carousel') || el.hasAttribute('data-carousel-images')) {
+          try {
+            const rawJson = el.getAttribute('data-carousel-images');
+            if (rawJson) {
+              const slides = JSON.parse(rawJson);
+              const caption = el.getAttribute('data-carousel-caption') || '';
+              const capAttr = caption ? ` caption="${caption}"` : '';
+              const slidesStr = slides
+                .map((s: any) => `  [slide: ${s.url}${s.caption ? ` "${s.caption}"` : ''}]`)
+                .join('\n');
+              return `\n\n[carousel${capAttr}]\n${slidesStr}\n[/carousel]\n\n`;
+            }
+          } catch {}
+        }
         const img = el.querySelector('img');
         const caption = el.querySelector('figcaption')?.textContent || img?.getAttribute('alt') || '';
         const src = img?.getAttribute('src') || '';

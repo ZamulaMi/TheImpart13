@@ -12,6 +12,7 @@ import {
   X,
 } from 'lucide-react';
 import { markdownToHtml } from '../utils/editorConverter';
+import { PhotoCarousel, CarouselSlide } from './PhotoCarousel';
 
 interface ContentRendererProps {
   content: string;
@@ -283,6 +284,7 @@ export const renderInlineFormatting = (text: string): React.ReactNode => {
 type ParsedBlock =
   | { type: 'youtube'; videoId: string; url: string }
   | { type: 'image'; src: string; caption?: string }
+  | { type: 'carousel'; images: CarouselSlide[]; caption?: string }
   | { type: 'heading'; level: 1 | 2 | 3; text: string }
   | { type: 'table'; headers: string[]; rows: string[][] }
   | {
@@ -315,6 +317,38 @@ export function parseContentToBlocks(content: string): ParsedBlock[] {
     if (!line) {
       i++;
       continue;
+    }
+
+    // 0. Карусель фото: [carousel caption="..."]...[/carousel]
+    if (line.startsWith('[carousel')) {
+      const carouselLines: string[] = [line];
+      i++;
+      while (i < lines.length && !lines[i].includes('[/carousel]')) {
+        carouselLines.push(lines[i]);
+        i++;
+      }
+      if (i < lines.length && lines[i].includes('[/carousel]')) {
+        carouselLines.push(lines[i]);
+        i++;
+      }
+      const fullCarouselText = carouselLines.join('\n');
+      const capMatch = fullCarouselText.match(/\[carousel(?:\s+caption=["'](.*?)["'])?\]/i);
+      const overallCap = capMatch?.[1];
+      const slides: CarouselSlide[] = [];
+      const slideMatches = fullCarouselText.matchAll(
+        /\[(?:slide|photo|image):\s*([^\s\]]+)(?:\s+["'](.*?)["'])?\]/gi
+      );
+      for (const sm of slideMatches) {
+        slides.push({ url: sm[1].trim(), caption: sm[2]?.trim() || undefined });
+      }
+      if (slides.length > 0) {
+        blocks.push({
+          type: 'carousel',
+          images: slides,
+          caption: overallCap,
+        });
+        continue;
+      }
     }
 
     // 1. Розділювач: --- або ***
@@ -613,6 +647,116 @@ export const ContentRenderer: React.FC<ContentRendererProps> = ({ content }) => 
 
   if (isHtml) {
     const processedHtml = cleanHtmlForTheme(markdownToHtml(content));
+    const CAROUSEL_REGEX = /<figure\b[^>]*\bclass=["'][^"']*\barticle-carousel\b[^"']*["'][^>]*>[\s\S]*?<\/figure>/gi;
+
+    if (CAROUSEL_REGEX.test(processedHtml)) {
+      CAROUSEL_REGEX.lastIndex = 0;
+      const chunks: React.ReactNode[] = [];
+      let lastIdx = 0;
+      let match: RegExpExecArray | null;
+
+      while ((match = CAROUSEL_REGEX.exec(processedHtml)) !== null) {
+        const matchIdx = match.index;
+        if (matchIdx > lastIdx) {
+          const before = processedHtml.slice(lastIdx, matchIdx);
+          chunks.push(
+            <div
+              key={`html_${lastIdx}`}
+              dangerouslySetInnerHTML={{ __html: before }}
+            />
+          );
+        }
+
+        const fullFig = match[0];
+        const imagesMatch = fullFig.match(/data-carousel-images=["']([^"']*)["']/i);
+        const capMatch = fullFig.match(/data-carousel-caption=["']([^"']*)["']/i);
+        let slides: CarouselSlide[] = [];
+        if (imagesMatch) {
+          try {
+            const raw = imagesMatch[1].replace(/&quot;/g, '"').replace(/&#39;/g, "'");
+            slides = JSON.parse(raw);
+          } catch {}
+        }
+        const cap = capMatch ? capMatch[1] : undefined;
+
+        if (slides.length > 0) {
+          chunks.push(
+            <PhotoCarousel
+              key={`carousel_${matchIdx}`}
+              images={slides}
+              caption={cap}
+              onOpenLightbox={(src, c) => setLightboxImg({ src, caption: c })}
+            />
+          );
+        } else {
+          chunks.push(
+            <div
+              key={`raw_${matchIdx}`}
+              dangerouslySetInnerHTML={{ __html: fullFig }}
+            />
+          );
+        }
+
+        lastIdx = matchIdx + fullFig.length;
+      }
+
+      if (lastIdx < processedHtml.length) {
+        chunks.push(
+          <div
+            key={`html_end_${lastIdx}`}
+            dangerouslySetInnerHTML={{ __html: processedHtml.slice(lastIdx) }}
+          />
+        );
+      }
+
+      return (
+        <div
+          className="article-rendered-html space-y-6 text-neutral-800 dark:text-[#cbcbcb] leading-relaxed font-sans text-base sm:text-lg"
+          onClick={(e) => {
+            const target = e.target as HTMLElement;
+            if (target.tagName.toLowerCase() === 'img' && !target.closest('.article-carousel-wrapper')) {
+              const img = target as HTMLImageElement;
+              const figcaption = target.closest('figure')?.querySelector('figcaption')?.textContent;
+              setLightboxImg({ src: img.src, caption: figcaption || img.alt });
+            }
+            const spoilerEl = target.closest('.tg-spoiler') as HTMLElement;
+            if (spoilerEl) spoilerEl.classList.toggle('revealed');
+          }}
+        >
+          {chunks}
+          {lightboxImg && (
+            <div
+              onClick={() => setLightboxImg(null)}
+              className="fixed inset-0 z-50 bg-black/90 backdrop-blur-sm flex items-center justify-center p-4 sm:p-8 animate-fade-in"
+            >
+              <button
+                onClick={() => setLightboxImg(null)}
+                className="absolute top-4 right-4 p-2 text-white/80 hover:text-white bg-white/10 hover:bg-white/20 rounded-full transition-colors cursor-pointer"
+                title="Закрити (Esc)"
+              >
+                <X className="w-6 h-6" />
+              </button>
+              <div
+                onClick={(e) => e.stopPropagation()}
+                className="max-w-5xl max-h-[90vh] flex flex-col items-center"
+              >
+                <img
+                  src={lightboxImg.src}
+                  alt={lightboxImg.caption || 'Зображення'}
+                  className="max-h-[82vh] w-auto max-w-full rounded-md object-contain shadow-2xl"
+                />
+                {lightboxImg.caption && (
+                  <p className="text-white/80 text-xs sm:text-sm mt-3 text-center font-sans max-w-xl">
+                    {lightboxImg.caption}
+                  </p>
+                )}
+              </div>
+            </div>
+          )}
+        </div>
+      );
+    }
+
     return (
       <div className="article-rendered-html space-y-6 text-neutral-800 dark:text-[#cbcbcb] leading-relaxed font-sans text-base sm:text-lg">
         <div
@@ -621,7 +765,7 @@ export const ContentRenderer: React.FC<ContentRendererProps> = ({ content }) => 
             const target = e.target as HTMLElement;
 
             // Клік на зображення для зуму
-            if (target.tagName.toLowerCase() === 'img') {
+            if (target.tagName.toLowerCase() === 'img' && !target.closest('.article-carousel-wrapper')) {
               const img = target as HTMLImageElement;
               const figcaption = target.closest('figure')?.querySelector('figcaption')?.textContent;
               setLightboxImg({ src: img.src, caption: figcaption || img.alt });
@@ -767,6 +911,18 @@ export const ContentRenderer: React.FC<ContentRendererProps> = ({ content }) => 
                 </figcaption>
               )}
             </figure>
+          );
+        }
+
+        // 4.5. Карусель фотографій
+        if (block.type === 'carousel') {
+          return (
+            <PhotoCarousel
+              key={idx}
+              images={block.images}
+              caption={block.caption}
+              onOpenLightbox={(src, c) => setLightboxImg({ src, caption: c })}
+            />
           );
         }
 

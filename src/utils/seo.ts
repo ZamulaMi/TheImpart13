@@ -52,6 +52,7 @@ export function stripHtml(input?: string): string {
     .replace(/<script[^>]*>[\s\S]*?<\/script>/gi, '')
     .replace(/<(?:\/?[a-zA-Z!?][^>]*)>/g, ' ')
     .replace(/!\[[^\]]*\]\([^)]*\)/g, ' ')
+    .replace(/\[carousel[\s\S]*?\[\/carousel\]/gi, ' ')
     .replace(/\[([^\]]+)\]\((?:https?:\/\/|\/|mailto:|tel:)[^)]+\)/g, '$1')
     .replace(/\[\/?(?:hl|color|font|u)(?::[^\]]+)?\]/gi, '')
     .replace(/\|\|/g, '')

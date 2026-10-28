@@ -116,6 +116,12 @@
       "date": "2026-10-27",
       "views": 2,
       "durationSeconds": 19
+    },
+    {
+      "articleId": "1793103844152",
+      "date": "2026-10-28",
+      "views": 1,
+      "durationSeconds": 4
     }
   ],
   "totals": {
@@ -144,8 +150,8 @@
       "durationSeconds": 21
     },
     "1793103844152": {
-      "views": 3,
-      "durationSeconds": 19
+      "views": 4,
+      "durationSeconds": 23
     },
     "1793101749879": {
       "views": 2,

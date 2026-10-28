@@ -264,6 +264,42 @@ function renderArticleBodyServerHtml(rawContent?: string): string {
       continue;
     }
 
+    if (trimmed.startsWith('[carousel')) {
+      const carouselLines: string[] = [trimmed];
+      i++;
+      while (i < lines.length && !lines[i].includes('[/carousel]')) {
+        carouselLines.push(lines[i]);
+        i++;
+      }
+      if (i < lines.length && lines[i].includes('[/carousel]')) {
+        carouselLines.push(lines[i]);
+        i++;
+      }
+      const fullText = carouselLines.join('\n');
+      const capMatch = fullText.match(/\[carousel(?:\s+caption=["'](.*?)["'])?\]/i);
+      const overallCap = capMatch?.[1] ? escapeHtml(capMatch[1]) : '';
+      const slides: Array<{ url: string; caption?: string }> = [];
+      const slideMatches = fullText.matchAll(
+        /\[(?:slide|photo|image):\s*([^\s\]]+)(?:\s+["'](.*?)["'])?\]/gi
+      );
+      for (const sm of slideMatches) {
+        slides.push({ url: sm[1].trim(), caption: sm[2]?.trim() || undefined });
+      }
+      if (slides.length > 0) {
+        const encodedJson = escapeHtml(JSON.stringify(slides));
+        const first = slides[0];
+        const cap = escapeHtml(first.caption || overallCap || '');
+        htmlBlocks.push(
+          `<figure class="article-carousel" data-carousel-images="${encodedJson}" data-carousel-caption="${overallCap}"><div class="carousel-container" style="position: relative; max-width: 100%; border-radius: 8px; overflow: hidden;"><img src="${escapeHtml(
+            first.url
+          )}" alt="${cap}" width="1200" height="675" loading="lazy" decoding="async" /><div class="carousel-counter" style="position: absolute; top: 12px; right: 12px; background: rgba(0,0,0,0.65); color: #fff; padding: 4px 10px; border-radius: 6px; font-size: 12px; font-family: monospace;">1 / ${
+            slides.length
+          }</div></div>${cap ? `<figcaption>${cap}</figcaption>` : ''}</figure>`
+        );
+        continue;
+      }
+    }
+
     const photoTagMatch = trimmed.match(/^\[(?:photo|image|img):\s*([^\s\]]+)(?:\s+"(.*?)")?\]$/i);
     if (photoTagMatch) {
       const src = escapeHtml(photoTagMatch[1].trim());

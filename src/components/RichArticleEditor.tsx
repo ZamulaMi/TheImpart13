@@ -31,9 +31,15 @@ import {
   Check,
   RotateCcw,
   Sparkles,
+  Images,
+  ArrowUp,
+  ArrowDown,
+  Plus,
+  Trash2,
 } from 'lucide-react';
 import { ContentRenderer } from './ContentRenderer';
 import { markdownToHtml } from '../utils/editorConverter';
+import { PhotoCarousel, CarouselSlide } from './PhotoCarousel';
 import { getAuthHeaders } from '../services/auth';
 import { formatErrorMessage } from '../utils/errors';
 
@@ -100,6 +106,15 @@ export const RichArticleEditor: React.FC<RichArticleEditorProps> = ({
 
   const [showVideoModal, setShowVideoModal] = useState(false);
   const [videoUrl, setVideoUrl] = useState('');
+
+  const [showCarouselModal, setShowCarouselModal] = useState(false);
+  const [carouselSlides, setCarouselSlides] = useState<Array<{ id: string; url: string; caption: string }>>([]);
+  const [carouselCaption, setCarouselCaption] = useState('');
+  const [carouselUrlInput, setCarouselUrlInput] = useState('');
+  const [carouselUrlCaption, setCarouselUrlCaption] = useState('');
+  const [isUploadingCarousel, setIsUploadingCarousel] = useState(false);
+  const [carouselUploadError, setCarouselUploadError] = useState<string | null>(null);
+  const carouselFileInputRef = useRef<HTMLInputElement>(null);
 
   // 1. Автоматичне закриття випадаючих меню при кліку за їх межами або Esc
   useEffect(() => {
@@ -1105,6 +1120,185 @@ export const RichArticleEditor: React.FC<RichArticleEditorProps> = ({
     setUploadError(null);
   };
 
+  // 20.5. Завантаження та керування каруселлю фотографій
+  const handleCarouselFiles = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = Array.from(e.target.files || []);
+    if (files.length === 0) return;
+
+    setIsUploadingCarousel(true);
+    setCarouselUploadError(null);
+
+    try {
+      const uploadPromises = files.map(async (file) => {
+        const dataUrl = await new Promise<string>((resolve, reject) => {
+          const reader = new FileReader();
+          reader.onload = (event) => {
+            const img = new Image();
+            img.onload = () => {
+              const canvas = document.createElement('canvas');
+              let width = img.width;
+              let height = img.height;
+              const maxDim = 1600;
+              if (width > maxDim || height > maxDim) {
+                if (width > height) {
+                  height = Math.round((height * maxDim) / width);
+                  width = maxDim;
+                } else {
+                  width = Math.round((width * maxDim) / height);
+                  height = maxDim;
+                }
+              }
+              canvas.width = width;
+              canvas.height = height;
+              const ctx = canvas.getContext('2d');
+              if (!ctx) {
+                resolve(event.target?.result as string);
+                return;
+              }
+              ctx.drawImage(img, 0, 0, width, height);
+              resolve(canvas.toDataURL('image/jpeg', 0.85));
+            };
+            img.onerror = () => reject(new Error('Не вдалося завантажити зображення'));
+            img.src = event.target?.result as string;
+          };
+          reader.onerror = () => reject(new Error('Помилка читання файлу'));
+          reader.readAsDataURL(file);
+        });
+
+        let finalUrl = dataUrl;
+        try {
+          const res = await fetch('/api/upload', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              ...getAuthHeaders(),
+            },
+            body: JSON.stringify({ data: dataUrl, filename: file.name }),
+          });
+          if (res.ok) {
+            const result = await res.json();
+            if (result.url) finalUrl = result.url;
+          }
+        } catch {}
+
+        return {
+          id: `slide_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`,
+          url: finalUrl,
+          caption: '',
+        };
+      });
+
+      const newSlides = await Promise.all(uploadPromises);
+      setCarouselSlides((prev) => [...prev, ...newSlides]);
+    } catch (err: any) {
+      setCarouselUploadError(formatErrorMessage(err, 'Помилка завантаження фотографій'));
+    } finally {
+      setIsUploadingCarousel(false);
+      if (carouselFileInputRef.current) {
+        carouselFileInputRef.current.value = '';
+      }
+    }
+  };
+
+  const handleAddSlideByUrl = () => {
+    if (!carouselUrlInput.trim()) return;
+    const url = carouselUrlInput.trim();
+    setCarouselSlides((prev) => [
+      ...prev,
+      {
+        id: `slide_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`,
+        url,
+        caption: carouselUrlCaption.trim(),
+      },
+    ]);
+    setCarouselUrlInput('');
+    setCarouselUrlCaption('');
+  };
+
+  const handleMoveSlide = (index: number, direction: 'up' | 'down') => {
+    setCarouselSlides((prev) => {
+      const targetIndex = direction === 'up' ? index - 1 : index + 1;
+      if (targetIndex < 0 || targetIndex >= prev.length) return prev;
+      const copy = [...prev];
+      const temp = copy[index];
+      copy[index] = copy[targetIndex];
+      copy[targetIndex] = temp;
+      return copy;
+    });
+  };
+
+  const handleRemoveSlide = (id: string) => {
+    setCarouselSlides((prev) => prev.filter((s) => s.id !== id));
+  };
+
+  const handleSlideCaptionChange = (id: string, caption: string) => {
+    setCarouselSlides((prev) =>
+      prev.map((s) => (s.id === id ? { ...s, caption } : s))
+    );
+  };
+
+  const handleApplyCarousel = () => {
+    if (carouselSlides.length < 2) return;
+    const slidesData: CarouselSlide[] = carouselSlides.map((s) => ({
+      url: s.url,
+      caption: s.caption.trim() || undefined,
+    }));
+    const encodedJson = JSON.stringify(slidesData).replace(/"/g, '&quot;');
+    const overallCap = carouselCaption.trim();
+    const encodedCap = overallCap.replace(/"/g, '&quot;');
+    const firstSlide = slidesData[0];
+    const firstCap = firstSlide.caption || overallCap || '';
+
+    if (viewMode === 'code') {
+      const capAttr = overallCap ? ` caption="${overallCap}"` : '';
+      const slidesMd = slidesData
+        .map((s) => `  [slide: ${s.url}${s.caption ? ` "${s.caption}"` : ''}]`)
+        .join('\n');
+      wrapSelectionInTextarea(`\n\n[carousel${capAttr}]\n${slidesMd}\n[/carousel]\n\n`, '', '');
+      setShowCarouselModal(false);
+      setCarouselSlides([]);
+      setCarouselCaption('');
+      setCarouselUploadError(null);
+      return;
+    }
+
+    const carouselHtml = `
+      <figure class="article-carousel" data-carousel-images="${encodedJson}" data-carousel-caption="${encodedCap}" style="margin: 32px 0; text-align: center; user-select: none;">
+        <div class="carousel-preview-container" style="position: relative; max-width: 100%; border-radius: 8px; overflow: hidden; background: #161616;">
+          <img src="${firstSlide.url}" alt="${firstCap}" style="max-width: 100%; max-height: 620px; border-radius: 8px; margin: 0 auto; display: block;" />
+          <div style="position: absolute; top: 12px; right: 12px; background: rgba(0,0,0,0.7); color: #fff; padding: 4px 10px; border-radius: 6px; font-size: 12px; font-family: monospace;">
+            📷 1 / ${slidesData.length}
+          </div>
+          <div style="position: absolute; bottom: 12px; left: 50%; transform: translateX(-50%); display: flex; gap: 6px; background: rgba(0,0,0,0.45); padding: 5px 12px; border-radius: 20px;">
+            ${slidesData
+              .map(
+                (_, i) =>
+                  `<span style="display: inline-block; width: ${
+                    i === 0 ? '20px' : '6px'
+                  }; height: 6px; border-radius: 3px; background: ${
+                    i === 0 ? '#ffffff' : 'rgba(255,255,255,0.45)'
+                  };"></span>`
+              )
+              .join('')}
+          </div>
+        </div>
+        ${
+          overallCap || firstSlide.caption
+            ? `<figcaption style="text-align: center; font-size: 13px; color: #6b7280; font-style: italic; margin-top: 8px;">${
+                overallCap ? `<strong>${overallCap}</strong>${firstSlide.caption ? ' • ' : ''}` : ''
+              }${firstSlide.caption || ''}</figcaption>`
+            : ''
+        }
+      </figure>
+    `;
+
+    insertBlockElement(carouselHtml);
+    setShowCarouselModal(false);
+    setCarouselSlides([]);
+    setCarouselCaption('');
+    setCarouselUploadError(null);
+  };
+
   // 21. Вставка YouTube відео
   const handleApplyVideo = () => {
     if (!videoUrl.trim()) return;
@@ -1717,6 +1911,23 @@ export const RichArticleEditor: React.FC<RichArticleEditorProps> = ({
             title="Вставити фото (зберегти файл на сервері або URL)"
           >
             <ImageIcon className="w-4 h-4 text-neutral-700" />
+          </button>
+
+          <button
+            type="button"
+            onMouseDown={(e) => {
+              saveSelection();
+              e.preventDefault();
+            }}
+            onClick={() => {
+              saveSelection();
+              setShowCarouselModal(true);
+            }}
+            className="inline-flex items-center gap-1 px-2 py-1 text-neutral-800 bg-neutral-100 hover:bg-neutral-200/80 border border-neutral-300 rounded transition-colors cursor-pointer text-xs font-medium"
+            title="Вставити карусель з декількох фото (слайдер)"
+          >
+            <Images className="w-3.5 h-3.5 text-neutral-700" />
+            <span>Карусель фото</span>
           </button>
 
           <button
@@ -2353,6 +2564,252 @@ export const RichArticleEditor: React.FC<RichArticleEditorProps> = ({
                     className="px-4 py-2 text-xs font-medium bg-red-600 text-white rounded hover:bg-red-700 transition-colors disabled:opacity-50 cursor-pointer"
                   >
                     Вставити відео
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>,
+          document.body
+        )}
+
+      {/* 5. КАРУСЕЛЬ ФОТОГРАФІЙ */}
+      {showCarouselModal &&
+        createPortal(
+          <div
+            onClick={() => setShowCarouselModal(false)}
+            className="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-3 sm:p-4 animate-fade-in"
+          >
+            <div
+              onClick={(e) => e.stopPropagation()}
+              className="bg-white rounded-xl shadow-2xl max-w-2xl w-full p-5 sm:p-6 border border-neutral-200 max-h-[92vh] flex flex-col"
+            >
+              {/* Заголовок модального вікна */}
+              <div className="flex items-center justify-between pb-3 border-b border-neutral-100 mb-4 flex-shrink-0">
+                <div className="flex items-center gap-2">
+                  <div className="p-1.5 bg-neutral-100 rounded-md text-neutral-800">
+                    <Images className="w-5 h-5" />
+                  </div>
+                  <div>
+                    <h3 className="font-semibold text-sm uppercase tracking-wider text-black">
+                      Карусель з фотографій
+                    </h3>
+                    <p className="text-xs text-neutral-500 font-sans mt-0.5">
+                      Додайте декілька фото. Читачі зможуть перемикати їх стрілками або свайпом.
+                    </p>
+                  </div>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setShowCarouselModal(false)}
+                  className="p-1 text-neutral-400 hover:text-black rounded transition-colors cursor-pointer"
+                  title="Закрити (Esc)"
+                >
+                  <X className="w-5 h-5" />
+                </button>
+              </div>
+
+              {/* Тіло модального вікна зі скролом */}
+              <div className="flex-1 overflow-y-auto pr-1 space-y-4">
+                {/* 1. Блок додавання фото (мультизавантаження файлів або URL) */}
+                <div className="p-4 rounded-lg bg-neutral-50 border border-neutral-200/80 space-y-3">
+                  <div className="flex items-center justify-between">
+                    <span className="text-xs font-semibold uppercase tracking-wider text-neutral-700">
+                      1. Додати фотографії
+                    </span>
+                    <span className="text-xs text-neutral-500 font-mono">
+                      Вже додано: {carouselSlides.length}
+                    </span>
+                  </div>
+
+                  {/* Прихований мульти-інпут файлів */}
+                  <input
+                    type="file"
+                    ref={carouselFileInputRef}
+                    multiple
+                    accept="image/*"
+                    onChange={handleCarouselFiles}
+                    className="hidden"
+                  />
+
+                  {/* Зона завантаження файлів */}
+                  <div
+                    onClick={() => carouselFileInputRef.current?.click()}
+                    className="border-2 border-dashed border-neutral-300 hover:border-black rounded-lg p-5 text-center cursor-pointer transition-colors bg-white hover:bg-neutral-50"
+                  >
+                    <Upload className="w-6 h-6 mx-auto text-neutral-400 mb-2" />
+                    <div className="text-xs font-medium text-neutral-900">
+                      {isUploadingCarousel
+                        ? 'Обробка та оптимізація фотографій...'
+                        : 'Натисніть сюди, щоб обрати кілька фото з пристрою'}
+                    </div>
+                    <div className="text-[11px] text-neutral-400 mt-1">
+                      Можна вибрати одразу декілька зображень (JPG, PNG, WEBP)
+                    </div>
+                  </div>
+
+                  {carouselUploadError && (
+                    <div className="text-xs text-red-600">{carouselUploadError}</div>
+                  )}
+
+                  {/* Або посилання URL */}
+                  <div className="pt-2 border-t border-neutral-200">
+                    <label className="block text-[11px] uppercase tracking-wider text-neutral-500 mb-1">
+                      Або додати за посиланням (URL)
+                    </label>
+                    <div className="flex gap-2">
+                      <input
+                        type="url"
+                        placeholder="https://images.unsplash.com/... або пряме посилання"
+                        value={carouselUrlInput}
+                        onChange={(e) => setCarouselUrlInput(e.target.value)}
+                        onKeyDown={(e) => {
+                          if (e.key === 'Enter') {
+                            e.preventDefault();
+                            handleAddSlideByUrl();
+                          }
+                        }}
+                        className="flex-1 text-xs border border-neutral-300 rounded px-3 py-1.5 focus:border-black focus:outline-none font-mono"
+                      />
+                      <button
+                        type="button"
+                        onClick={handleAddSlideByUrl}
+                        disabled={!carouselUrlInput.trim()}
+                        className="px-3 py-1.5 bg-neutral-900 text-white rounded text-xs font-medium hover:bg-black disabled:opacity-40 transition-colors cursor-pointer flex items-center gap-1"
+                      >
+                        <Plus className="w-3.5 h-3.5" />
+                        <span>Додати</span>
+                      </button>
+                    </div>
+                  </div>
+                </div>
+
+                {/* 2. Список доданих фотографій зі зміною черговості та підписами */}
+                {carouselSlides.length > 0 && (
+                  <div className="space-y-2">
+                    <div className="flex items-center justify-between text-xs font-semibold uppercase tracking-wider text-neutral-700">
+                      <span>2. Список слайдів (сортування та підписи)</span>
+                      <span className="text-[11px] font-normal text-neutral-500 lowercase">
+                        стрілками можна міняти черговість
+                      </span>
+                    </div>
+
+                    <div className="space-y-2 max-h-56 overflow-y-auto pr-1">
+                      {carouselSlides.map((slide, idx) => (
+                        <div
+                          key={slide.id}
+                          className="flex items-center gap-2.5 p-2 bg-white border border-neutral-200 rounded-lg shadow-2xs hover:border-neutral-300 transition-colors"
+                        >
+                          {/* Номер та мініатюра */}
+                          <div className="flex items-center gap-2 flex-shrink-0">
+                            <span className="text-xs font-mono font-semibold text-neutral-400 w-4 text-center">
+                              {idx + 1}
+                            </span>
+                            <img
+                              src={slide.url}
+                              alt={`Слайд ${idx + 1}`}
+                              className="w-12 h-12 object-cover rounded border border-neutral-200"
+                            />
+                          </div>
+
+                          {/* Інпут підпису до слайда */}
+                          <div className="flex-1 min-w-0">
+                            <input
+                              type="text"
+                              placeholder="Підпис до цього фото (необов'язково)"
+                              value={slide.caption}
+                              onChange={(e) => handleSlideCaptionChange(slide.id, e.target.value)}
+                              className="w-full text-xs border border-neutral-200 rounded px-2.5 py-1.5 focus:border-black focus:outline-none"
+                            />
+                          </div>
+
+                          {/* Кнопки переміщення вгору / вниз та видалення */}
+                          <div className="flex items-center gap-1 flex-shrink-0">
+                            <button
+                              type="button"
+                              onClick={() => handleMoveSlide(idx, 'up')}
+                              disabled={idx === 0}
+                              title="Перемістити вище"
+                              className="p-1 text-neutral-500 hover:text-black disabled:opacity-20 hover:bg-neutral-100 rounded cursor-pointer"
+                            >
+                              <ArrowUp className="w-3.5 h-3.5" />
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => handleMoveSlide(idx, 'down')}
+                              disabled={idx === carouselSlides.length - 1}
+                              title="Перемістити нижче"
+                              className="p-1 text-neutral-500 hover:text-black disabled:opacity-20 hover:bg-neutral-100 rounded cursor-pointer"
+                            >
+                              <ArrowDown className="w-3.5 h-3.5" />
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => handleRemoveSlide(slide.id)}
+                              title="Видалити це фото"
+                              className="p-1 text-red-500 hover:text-red-700 hover:bg-red-50 rounded cursor-pointer ml-1"
+                            >
+                              <Trash2 className="w-3.5 h-3.5" />
+                            </button>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {/* 3. Загальний підпис до всієї каруселі */}
+                <div>
+                  <label className="block text-xs uppercase tracking-wider text-neutral-700 font-semibold mb-1">
+                    3. Загальний підпис до каруселі (необов'язково)
+                  </label>
+                  <input
+                    type="text"
+                    placeholder="Наприклад: 'Серія знімків презентації' або 'Фото: Reuters'"
+                    value={carouselCaption}
+                    onChange={(e) => setCarouselCaption(e.target.value)}
+                    className="w-full text-xs border border-neutral-300 rounded px-3 py-2 focus:border-black focus:outline-none"
+                  />
+                </div>
+
+                {/* 4. Інтерактивне прев'ю каруселі прямо в модалці */}
+                {carouselSlides.length >= 2 && (
+                  <div className="pt-2 border-t border-neutral-200">
+                    <div className="text-[11px] uppercase tracking-wider text-neutral-500 font-semibold mb-2">
+                      Попередній перегляд слайдера:
+                    </div>
+                    <PhotoCarousel
+                      images={carouselSlides.map((s) => ({ url: s.url, caption: s.caption }))}
+                      caption={carouselCaption}
+                      isEditor={true}
+                      className="my-0 max-h-[360px]"
+                    />
+                  </div>
+                )}
+              </div>
+
+              {/* Нижня панель дій */}
+              <div className="flex items-center justify-between pt-3 border-t border-neutral-200 mt-4 flex-shrink-0">
+                <span className="text-xs text-neutral-500">
+                  {carouselSlides.length < 2
+                    ? '⚠️ Для каруселі потрібно мінімум 2 фото'
+                    : `✓ Готово: ${carouselSlides.length} фото`}
+                </span>
+                <div className="flex items-center gap-2">
+                  <button
+                    type="button"
+                    onClick={() => setShowCarouselModal(false)}
+                    className="px-4 py-2 text-xs font-medium text-neutral-600 hover:bg-neutral-100 rounded cursor-pointer"
+                  >
+                    Скасувати
+                  </button>
+                  <button
+                    type="button"
+                    onClick={handleApplyCarousel}
+                    disabled={carouselSlides.length < 2 || isUploadingCarousel}
+                    className="px-4 py-2 text-xs font-medium bg-black text-white rounded hover:bg-neutral-800 disabled:opacity-40 transition-colors cursor-pointer flex items-center gap-1.5"
+                  >
+                    <Images className="w-3.5 h-3.5" />
+                    <span>Вставити карусель ({carouselSlides.length})</span>
                   </button>
                 </div>
               </div>
