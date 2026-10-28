@@ -521,6 +521,8 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
       // Загальні метадані
       author: editingArticle.author?.trim() || 'Редакція The Impart',
       coverImage: editingArticle.coverImage?.trim() || undefined,
+      coverImageCaption: editingArticle.coverImageCaption?.trim() || undefined,
+      coverImageCaptionEn: editingArticle.coverImageCaptionEn?.trim() || undefined,
       date: originalDate,
       createdAt: originalCreatedAt,
       updatedAt: updatedAt,
@@ -1444,8 +1446,59 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
                   </div>
                 </div>
 
+                {/* Підпис до головного фото / заставки */}
+                <div className="pt-3 border-t border-neutral-100">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div>
+                      <div className="flex items-center justify-between mb-1.5">
+                        <label className="block text-xs uppercase tracking-wider text-neutral-500 font-medium">
+                          Підпис головного фото (UA)
+                        </label>
+                        <span className="text-[11px] text-neutral-400 font-normal">
+                          тільки у статті
+                        </span>
+                      </div>
+                      <input
+                        type="text"
+                        placeholder="Вкажіть підпис або джерело/автора фото (наприклад: Фото: Reuters)..."
+                        value={editingArticle.coverImageCaption || ''}
+                        onChange={(e) =>
+                          setEditingArticle((prev) => (prev ? { ...prev, coverImageCaption: e.target.value } : prev))
+                        }
+                        className="w-full text-xs sm:text-sm border-b border-neutral-200 pb-1.5 focus:border-black focus:outline-none transition-colors bg-transparent"
+                      />
+                      <p className="text-[11px] text-neutral-400 mt-1">
+                        Відображається під головним фото виключно у статті, не на картках каталогу.
+                      </p>
+                    </div>
+
+                    <div>
+                      <div className="flex items-center justify-between mb-1.5">
+                        <label className="block text-xs uppercase tracking-wider text-neutral-500 font-medium">
+                          Підпис головного фото (EN)
+                        </label>
+                        <span className="text-[11px] text-neutral-400 font-normal">
+                          for English version
+                        </span>
+                      </div>
+                      <input
+                        type="text"
+                        placeholder="Photo credit or caption in English (e.g. Photo: Reuters)..."
+                        value={editingArticle.coverImageCaptionEn || ''}
+                        onChange={(e) =>
+                          setEditingArticle((prev) => (prev ? { ...prev, coverImageCaptionEn: e.target.value } : prev))
+                        }
+                        className="w-full text-xs sm:text-sm border-b border-neutral-200 pb-1.5 focus:border-black focus:outline-none transition-colors bg-transparent"
+                      />
+                      <p className="text-[11px] text-neutral-400 mt-1">
+                        Displayed under the cover image exclusively inside the English article.
+                      </p>
+                    </div>
+                  </div>
+                </div>
+
                 {editingArticle.coverImage && (
-                  <div className="relative aspect-[16/9] max-h-48 overflow-hidden rounded-md bg-neutral-100 border border-neutral-200 group">
+                  <div className="relative aspect-[16/10] sm:aspect-[21/9] md:aspect-[26/10.5] max-h-56 overflow-hidden rounded-lg bg-neutral-100 border border-neutral-200 group">
                     <img
                       src={editingArticle.coverImage}
                       alt="Обкладинка"
@@ -1454,6 +1507,9 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
                         (e.target as HTMLImageElement).style.display = 'none';
                       }}
                     />
+                    <div className="absolute top-2 left-2 px-2 py-0.5 rounded bg-black/60 text-white text-[10px] uppercase tracking-wider font-mono backdrop-blur-xs">
+                      Формат заставки (26:10.5)
+                    </div>
                     <button
                       type="button"
                       onClick={() => setEditingArticle((prev) => (prev ? { ...prev, coverImage: '' } : prev))}
@@ -1462,6 +1518,14 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
                     >
                       <X className="w-3.5 h-3.5" />
                     </button>
+                    {(editingArticle.coverImageCaption || editingArticle.coverImageCaptionEn) && (
+                      <div className="absolute bottom-0 inset-x-0 bg-black/70 text-white text-xs px-3 py-1.5 backdrop-blur-xs flex items-center justify-between">
+                        <span className="truncate italic">
+                          Підпис: {editingArticle.coverImageCaption || editingArticle.coverImageCaptionEn}
+                        </span>
+                        <span className="text-[10px] text-neutral-300 ml-2 shrink-0">тільки у статті</span>
+                      </div>
+                    )}
                   </div>
                 )}
               </div>

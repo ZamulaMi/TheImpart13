@@ -28,6 +28,8 @@ export interface Article {
   topics?: string[];
   author: string;
   coverImage?: string;
+  coverImageCaption?: string;
+  coverImageCaptionEn?: string;
   date: string;
   readTime?: string;
   createdAt?: string;
@@ -220,6 +222,8 @@ export async function initDb() {
       await sql`ALTER TABLE articles ADD COLUMN IF NOT EXISTS updated_at TIMESTAMP WITH TIME ZONE;`;
       await sql`ALTER TABLE articles ADD COLUMN IF NOT EXISTS show_excerpt_in_article BOOLEAN DEFAULT true;`;
       await sql`ALTER TABLE articles ADD COLUMN IF NOT EXISTS show_excerpt_in_article_en BOOLEAN DEFAULT true;`;
+      await sql`ALTER TABLE articles ADD COLUMN IF NOT EXISTS cover_image_caption TEXT;`;
+      await sql`ALTER TABLE articles ADD COLUMN IF NOT EXISTS cover_image_caption_en TEXT;`;
     }, 4000);
 
     isTableInitialized = true;
@@ -278,6 +282,8 @@ export async function getArticles(): Promise<Article[]> {
           a.topics_en as "topicsEn",
           a.show_excerpt_in_article as "showExcerptInArticle",
           a.show_excerpt_in_article_en as "showExcerptInArticleEn",
+          a.cover_image_caption as "coverImageCaption",
+          a.cover_image_caption_en as "coverImageCaptionEn",
           COALESCE(s.total_views, 0)::int as "views"
         FROM articles a
         LEFT JOIN (
@@ -304,6 +310,8 @@ export async function getArticles(): Promise<Article[]> {
           topics: parseJsonArray(r.topics) || [],
           author: String(r.author || 'Редакція The Impart'),
           coverImage: r.coverImage || undefined,
+          coverImageCaption: r.coverImageCaption ? String(r.coverImageCaption) : undefined,
+          coverImageCaptionEn: r.coverImageCaptionEn ? String(r.coverImageCaptionEn) : undefined,
           date: String(r.date || ''),
           readTime: r.readTime ? String(r.readTime) : undefined,
           createdAt: r.createdAt ? new Date(r.createdAt).toISOString() : undefined,
@@ -489,6 +497,8 @@ export async function saveArticle(article: Article): Promise<Article> {
   const category = String(article.category || 'Загальне').trim();
   const author = String(article.author || 'Редакція The Impart').trim();
   const coverImage = article.coverImage ? String(article.coverImage).trim() : undefined;
+  const coverImageCaption = article.coverImageCaption ? String(article.coverImageCaption).trim() : undefined;
+  const coverImageCaptionEn = article.coverImageCaptionEn ? String(article.coverImageCaptionEn).trim() : undefined;
   const readTime = article.readTime ? String(article.readTime) : undefined;
 
   const titleEn = article.titleEn ? String(article.titleEn).trim() : undefined;
@@ -529,6 +539,8 @@ export async function saveArticle(article: Article): Promise<Article> {
     categories,
     author,
     coverImage,
+    coverImageCaption,
+    coverImageCaptionEn,
     titleEn,
     excerptEn,
     contentEn,
@@ -559,6 +571,8 @@ export async function saveArticle(article: Article): Promise<Article> {
     topics,
     author,
     coverImage,
+    coverImageCaption,
+    coverImageCaptionEn,
     date,
     readTime,
     createdAt,
@@ -615,6 +629,7 @@ export async function saveArticle(article: Article): Promise<Article> {
           id, title, excerpt, show_excerpt_in_article, content, category, author, cover_image, date, read_time, published,
           title_en, excerpt_en, show_excerpt_in_article_en, content_en, category_en, published_en,
           categories, categories_en, topics, topics_en,
+          cover_image_caption, cover_image_caption_en,
           created_at, updated_at
         )
         VALUES (
@@ -639,6 +654,8 @@ export async function saveArticle(article: Article): Promise<Article> {
           ${categoriesEnJson},
           ${topicsJson},
           ${topicsEnJson},
+          ${coverImageCaption || null},
+          ${coverImageCaptionEn || null},
           ${createdAt ? new Date(createdAt) : new Date()},
           ${updatedAt ? new Date(updatedAt) : null}
         )
@@ -650,6 +667,8 @@ export async function saveArticle(article: Article): Promise<Article> {
           category = EXCLUDED.category,
           author = EXCLUDED.author,
           cover_image = EXCLUDED.cover_image,
+          cover_image_caption = EXCLUDED.cover_image_caption,
+          cover_image_caption_en = EXCLUDED.cover_image_caption_en,
           read_time = EXCLUDED.read_time,
           published = EXCLUDED.published,
           title_en = EXCLUDED.title_en,

@@ -951,6 +951,9 @@ export async function generatePageResponse(
         : article.topics || [];
 
     const coverSrc = article.coverImage || structuredImageUrl;
+    const coverCaption = effectiveIsEn
+      ? (article.coverImageCaptionEn || article.coverImageCaption)
+      : article.coverImageCaption;
 
     const rootHtml = `<div class="min-h-screen w-full bg-white dark:bg-[#222222] text-black dark:text-[#cbcbcb] flex flex-col justify-between">
   ${renderServerHeaderHtml(bundle.navCategories, effectiveIsEn)}
@@ -973,9 +976,16 @@ export async function generatePageResponse(
       </div>
       ${
         coverSrc
-          ? `<div class="mb-10 aspect-[16/9] w-full overflow-hidden bg-neutral-100 dark:bg-[#181818] rounded-lg">
-        <img src="${escapeHtml(coverSrc)}" alt="${escapeHtml(cleanTitle)}" width="1200" height="675" fetchpriority="high" decoding="async" class="w-full h-full object-cover" />
-      </div>`
+          ? `<figure class="mb-10 -mx-3 sm:-mx-8 md:-mx-14 lg:-mx-20">
+        <div class="w-full aspect-[26/13] overflow-hidden bg-neutral-100 dark:bg-[#181818] rounded-xl sm:rounded-2xl border border-transparent dark:border-[#2e2e2e]">
+          <img src="${escapeHtml(coverSrc)}" alt="${escapeHtml(cleanTitle)}" width="1600" height="800" fetchpriority="high" decoding="async" class="w-full h-full object-cover" />
+        </div>
+        ${
+          coverCaption
+            ? `<figcaption class="mt-2.5 sm:mt-3 text-center text-xs sm:text-sm text-neutral-500 dark:text-[#888888] font-sans italic px-4">${escapeHtml(coverCaption)}</figcaption>`
+            : ''
+        }
+      </figure>`
           : ''
       }
       ${

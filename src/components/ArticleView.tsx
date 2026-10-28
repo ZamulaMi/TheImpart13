@@ -198,6 +198,9 @@ export const ArticleView: React.FC<ArticleViewProps> = ({
 
   const timeDisplay = formatTimeAgoOrDate(article.createdAt, article.date, article.id, lang);
   const publishedIso = resolveArticlePublishedIso(article);
+  const coverCaption = isEn && hasEnVersion
+    ? (article.coverImageCaptionEn || article.coverImageCaption)
+    : article.coverImageCaption;
 
   return (
     <article className="w-[92%] sm:w-[90%] md:max-w-3xl mx-auto py-8 sm:py-16 animate-article-fade-in">
@@ -298,19 +301,26 @@ export const ArticleView: React.FC<ArticleViewProps> = ({
         </div>
       </div>
 
-      {/* Обкладинка статті */}
+      {/* Головна обкладинка статті: формат 26:13 у середині статті */}
       {article.coverImage && (
-        <div className="mb-10 aspect-[16/9] w-full overflow-hidden bg-neutral-100 dark:bg-[#181818] rounded-lg border border-transparent dark:border-[#2e2e2e]">
-          <img
-            src={article.coverImage}
-            alt={title}
-            width={1200}
-            height={675}
-            fetchPriority="high"
-            decoding="async"
-            className="w-full h-full object-cover"
-          />
-        </div>
+        <figure className="mb-10 -mx-3 sm:-mx-8 md:-mx-14 lg:-mx-20">
+          <div className="w-full aspect-[26/13] overflow-hidden bg-neutral-100 dark:bg-[#181818] rounded-xl sm:rounded-2xl border border-transparent dark:border-[#2e2e2e] shadow-xs">
+            <img
+              src={article.coverImage}
+              alt={title}
+              width={1600}
+              height={800}
+              fetchPriority="high"
+              decoding="async"
+              className="w-full h-full object-cover"
+            />
+          </div>
+          {coverCaption && (
+            <figcaption className="mt-2.5 sm:mt-3 text-center text-xs sm:text-sm text-neutral-500 dark:text-[#888888] font-sans italic px-4">
+              {coverCaption}
+            </figcaption>
+          )}
+        </figure>
       )}
 
       {/* Лід / короткий опис */}

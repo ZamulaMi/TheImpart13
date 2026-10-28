@@ -39,6 +39,8 @@ export interface Article {
   topics?: string[]; // Теми / теги статті (UA)
   author: string;
   coverImage?: string;
+  coverImageCaption?: string; // Підпис до головного фото / заставки (відображається виключно у статті)
+  coverImageCaptionEn?: string; // Підпис до головного фото / заставки для англійської версії
   date: string;
   readTime?: string;
   createdAt?: string;
