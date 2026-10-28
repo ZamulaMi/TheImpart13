@@ -977,8 +977,8 @@ export async function generatePageResponse(
       ${
         coverSrc
           ? `<figure class="mb-10 -mx-3 sm:-mx-8 md:-mx-14 lg:-mx-20">
-        <div class="w-full aspect-[26/13] overflow-hidden bg-neutral-100 dark:bg-[#181818] rounded-xl sm:rounded-2xl border border-transparent dark:border-[#2e2e2e]">
-          <img src="${escapeHtml(coverSrc)}" alt="${escapeHtml(cleanTitle)}" width="1600" height="800" fetchpriority="high" decoding="async" class="w-full h-full object-cover" />
+        <div class="w-full aspect-[26/14.5] overflow-hidden bg-neutral-100 dark:bg-[#181818] rounded-xl sm:rounded-2xl border border-transparent dark:border-[#2e2e2e]">
+          <img src="${escapeHtml(coverSrc)}" alt="${escapeHtml(cleanTitle)}" width="1600" height="892" fetchpriority="high" decoding="async" class="w-full h-full object-cover" />
         </div>
         ${
           coverCaption

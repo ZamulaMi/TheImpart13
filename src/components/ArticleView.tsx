@@ -301,15 +301,15 @@ export const ArticleView: React.FC<ArticleViewProps> = ({
         </div>
       </div>
 
-      {/* Головна обкладинка статті: формат 26:13 у середині статті */}
+      {/* Головна обкладинка статті: формат 26:14.5 у середині статті */}
       {article.coverImage && (
         <figure className="mb-10 -mx-3 sm:-mx-8 md:-mx-14 lg:-mx-20">
-          <div className="w-full aspect-[26/13] overflow-hidden bg-neutral-100 dark:bg-[#181818] rounded-xl sm:rounded-2xl border border-transparent dark:border-[#2e2e2e] shadow-xs">
+          <div className="w-full aspect-[26/14.5] overflow-hidden bg-neutral-100 dark:bg-[#181818] rounded-xl sm:rounded-2xl border border-transparent dark:border-[#2e2e2e] shadow-xs">
             <img
               src={article.coverImage}
               alt={title}
               width={1600}
-              height={800}
+              height={892}
               fetchPriority="high"
               decoding="async"
               className="w-full h-full object-cover"
